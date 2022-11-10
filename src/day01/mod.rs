@@ -14,19 +14,3 @@ pub fn run(part: Part) -> String {
         Part::Two => part2::solve(&input).to_string(),
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_part_one() {
-        assert_eq!(run(Part::One), 1583.to_string());
-    }
-
-    #[test]
-    fn test_part_two() {
-        assert_eq!(run(Part::Two), 1627.to_string());
-    }
-
-}
