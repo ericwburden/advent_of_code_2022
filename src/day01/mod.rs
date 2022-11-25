@@ -14,3 +14,20 @@ pub fn run(part: Part) -> String {
         Part::Two => part2::solve(&input).to_string(),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn check_answer_one() {
+        let result = run(Part::One);
+        println!("{result}");
+    }
+
+    #[test]
+    fn check_answer_two() {
+        let result = run(Part::Two);
+        println!("{result}");
+    }
+}

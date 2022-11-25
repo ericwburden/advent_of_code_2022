@@ -14,3 +14,14 @@ pub fn run(part: Part) -> String {
         Part::Two => String::from("No part 2 for Day 25!"),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn check_answer_one() {
+        let result = run(Part::One);
+        println!("{result}");
+    }
+}
