@@ -15,22 +15,23 @@ set up folders for each day's code and input files like so:
 
 ```
 <project root>
+├─benches
+│ └─all_days.rs
 ├─input
 │ └─XX
 │   ├─input.txt
 │   └─test.txt
 ├─src
-│ └─dayXX
-│   ├─input.rs
-│   ├─mod.rs
-│   ├─part1.rs
-│   └─part2.rs
+│ ├─dayXX
+│ │ ├─input.rs
+│ │ ├─mod.rs
+│ │ ├─part1.rs
+│ │ └─part2.rs
+│ ├─bin.rs
+│ └─lib.rs
 ├─Cargo.toml
 └─README.md
 ```
-
-At present, the `main` method doesn't do anything, though I have plans to make it into a
-CLI to run the code for particular days, similar to my setup for 2021.
 
 There are a few organizational notes to point out here:
 
@@ -48,5 +49,14 @@ There are a few organizational notes to point out here:
 - The `part1.rs` and `part2.rs` files each contain a `solve(_: &Input) -> Output` function
   that takes a reference to the parsed input and returns the solution for that part of
   that day.
+  
+  ## Usage
+  
+  Most of the functionality of this project shell is best accessed via `cargo` (though you can
+  install the project if you really want to).
+  
+  - `cargo test` to run the tests. Full documentation for that command [here](https://doc.rust-lang.org/cargo/commands/cargo-test.html)
+  - `cargo bench` to run the benchmarks. Full documentation for that command [here](https://bheisler.github.io/criterion.rs/book/user_guide/command_line_options.html)
+  - `cargo run` to run the first day's solutions and print the results. `cargo run <number>` to run the <number> day's solutions and print the results.
 
  
