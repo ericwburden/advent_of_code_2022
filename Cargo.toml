@@ -3,8 +3,21 @@ name = "advent_of_code_2022"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "aoc2022lib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "aoc2022bin"
+path = "src/bin.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 clap = { version = "4.0.22", features = ["derive"] }
+criterion = "0.4.0"
 nom = "7.1.1"
+
+[[bench]]
+name = "all_days"
+harness = false
