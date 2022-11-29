@@ -36,11 +36,12 @@ set up folders for each day's code and input files like so:
 There are a few organizational notes to point out here:
 
 - The `mod.rs` file for each day defines `Input` as a type alias for the type the
-  input file will be parsed into, `Output` as a type alias for the puzzle answer type
-  (usually a `u32` or `i32`), and a convenience function `run(_: Part) -> String`
+  input file will be parsed into, and a convenience function `run(_: Part) -> Output`
   that reads in the input and solves for either part one or part two, depending on the
-  variant of `Part` that is passed and returns the result as a string (for printing). 
+  variant of `Part` that is passed and returns the result as an Output (for consistency). 
   This file also contains the tests that cofirm the answer once it has been found.
+- `Output` is an enum with variants for `u32`, `i32`, `u64, `i64`, and `String`. This
+  allows the binary to expect the same (printable) type from each day's solution.
 - Input files are being included in each day's `input.rs` via the `include_str!()` macro,
   which means parsing will be on the file contents as one long, newline-separated, string
   slice. The main entrypoint for input parsing is the `read() -> Input` function which
