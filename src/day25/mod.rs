@@ -1,17 +1,16 @@
 pub mod input;
 pub mod part1;
 
-use crate::Part;
+use crate::{Part, Output};
 
 pub type Input = u8;
-pub type Output = u8;
 
 
-pub fn run(part: Part) -> String {
+pub fn run(part: Part) -> Output {
     let input = input::read();
     match part {
-        Part::One => part1::solve(&input).to_string(),
-        Part::Two => String::from("No part 2 for Day 25!"),
+        Part::One => part1::solve(&input),
+        Part::Two => String::from("No part 2 for Day 25!").into(),
     }
 }
 
