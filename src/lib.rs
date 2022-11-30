@@ -34,7 +34,7 @@ pub enum Part {
     Two,
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq)]
 pub enum Output {
     U32(u32),
     I32(i32),
@@ -85,72 +85,10 @@ impl Display for Output {
     }
 }
 
-impl PartialEq<u32> for Output {
-    fn eq(&self, other: &u32) -> bool {
-        let Output::U32(value) = self else { return false; };
-        value == other
-    }
-}
-
-impl PartialEq<Output> for u32 {
-    fn eq(&self, other: &Output) -> bool {
-        let Output::U32(value) = other else { return false; };
-        value == self
-    }
-}
-
-impl PartialEq<i32> for Output {
-    fn eq(&self, other: &i32) -> bool {
-        let Output::I32(value) = self else { return false; };
-        value == other
-    }
-}
-
-impl PartialEq<Output> for i32 {
-    fn eq(&self, other: &Output) -> bool {
-        let Output::I32(value) = other else { return false; };
-        value == self
-    }
-}
-
-impl PartialEq<u64> for Output {
-    fn eq(&self, other: &u64) -> bool {
-        let Output::U64(value) = self else { return false; };
-        value == other
-    }
-}
-
-impl PartialEq<Output> for u64 {
-    fn eq(&self, other: &Output) -> bool {
-        let Output::U64(value) = other else { return false; };
-        value == self
-    }
-}
-
-impl PartialEq<i64> for Output {
-    fn eq(&self, other: &i64) -> bool {
-        let Output::I64(value) = self else { return false; };
-        value == other
-    }
-}
-
-impl PartialEq<Output> for i64 {
-    fn eq(&self, other: &Output) -> bool {
-        let Output::I64(value) = other else { return false; };
-        value == self
-    }
-}
-
-impl PartialEq<&str> for Output {
-    fn eq(&self, other: &&str) -> bool {
-        let Output::String(value) = self else { return false; };
-        value == other
-    }
-}
-
-impl PartialEq<Output> for &str {
-    fn eq(&self, other: &Output) -> bool {
-        let Output::String(value) = other else { return false; };
-        value == self
+/// Consider an output equal to any value where they can both be
+/// coerced to the same string
+impl<T: Display> PartialEq<T> for Output {
+    fn eq(&self, other: &T) -> bool {
+        *self.to_string() == other.to_string()
     }
 }
