@@ -2,7 +2,7 @@ pub mod input;
 pub mod part1;
 pub mod part2;
 
-use crate::{Part, Output};
+use crate::{Output, Part};
 
 pub type Input = Vec<u32>;
 

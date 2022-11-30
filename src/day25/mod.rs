@@ -1,10 +1,9 @@
 pub mod input;
 pub mod part1;
 
-use crate::{Part, Output};
+use crate::{Output, Part};
 
 pub type Input = u8;
-
 
 pub fn run(part: Part) -> Output {
     let input = input::read();

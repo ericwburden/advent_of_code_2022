@@ -1,6 +1,6 @@
 #![allow(unused)]
-use std::fmt::{Display, Formatter, Result as DisplayResult};
 use std::cmp::PartialEq;
+use std::fmt::{Display, Formatter, Result as DisplayResult};
 
 pub mod day01;
 pub mod day02;
@@ -72,7 +72,6 @@ impl From<i16> for Output {
         Output::I16(value)
     }
 }
-
 
 impl From<u32> for Output {
     fn from(value: u32) -> Self {
