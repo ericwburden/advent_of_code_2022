@@ -8,15 +8,24 @@ pub fn read() -> Input {
     // parsing each chunk into a total calorie count
     // per Elf, returning the list of total calories per
     // Elf.
-    INPUT.trim().split("\n\n").map(parse_elf_calories).collect()
+    INPUT
+        .trim()
+        .split("\n\n")
+        .map(try_parse_elf_calories)
+        .collect::<Result<_, _>>()
+        .expect("Could not parse input!")
 }
 
 /// Parse a "chunk" of lines representing an individual
 /// Elf's snacks into the total calories for that Elf.
-fn parse_elf_calories(value: &str) -> u32 {
+fn try_parse_elf_calories(value: &str) -> Result<u32, std::num::ParseIntError> {
     // Iterate over each line, convert it to a u32 (ignoring any
     // that fail to parse), and summing the results.
-    value.lines().flat_map(|l| l.parse::<u32>()).sum::<u32>()
+    let mut total = 0;
+    for line in value.lines() {
+        total += line.parse::<u32>()?;
+    }
+    Ok(total)
 }
 
 #[cfg(test)]
