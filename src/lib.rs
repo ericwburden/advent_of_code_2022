@@ -34,85 +34,35 @@ pub enum Part {
     Two,
 }
 
-#[derive(Debug, Eq)]
-pub enum Output {
-    U8(u8),
-    U16(u16),
-    U32(u32),
-    U64(u64),
-    U128(u128),
-    I8(i8),
-    I16(i16),
-    I32(i32),
-    I64(i64),
-    I128(i128),
-    String(String),
+macro_rules! impl_output_from {
+    ( $( ($e:tt, $t:ty) ),* ) => {
+        #[derive(Debug, Eq)]
+        pub enum Output {
+            $( $e($t), )*
+        }
+
+        $(
+            impl From<$t> for Output {
+                fn from(value: $t) -> Self {
+                    Output::$e(value)
+                }
+            }
+        )*
+    };
 }
 
-impl From<u8> for Output {
-    fn from(value: u8) -> Self {
-        Output::U8(value)
-    }
-}
-
-impl From<i8> for Output {
-    fn from(value: i8) -> Self {
-        Output::I8(value)
-    }
-}
-
-impl From<u16> for Output {
-    fn from(value: u16) -> Self {
-        Output::U16(value)
-    }
-}
-
-impl From<i16> for Output {
-    fn from(value: i16) -> Self {
-        Output::I16(value)
-    }
-}
-
-impl From<u32> for Output {
-    fn from(value: u32) -> Self {
-        Output::U32(value)
-    }
-}
-
-impl From<i32> for Output {
-    fn from(value: i32) -> Self {
-        Output::I32(value)
-    }
-}
-
-impl From<u64> for Output {
-    fn from(value: u64) -> Self {
-        Output::U64(value)
-    }
-}
-
-impl From<i64> for Output {
-    fn from(value: i64) -> Self {
-        Output::I64(value)
-    }
-}
-
-impl From<u128> for Output {
-    fn from(value: u128) -> Self {
-        Output::U128(value)
-    }
-}
-
-impl From<i128> for Output {
-    fn from(value: i128) -> Self {
-        Output::I128(value)
-    }
-}
-
-impl From<String> for Output {
-    fn from(value: String) -> Self {
-        Output::String(value)
-    }
+impl_output_from!{
+    (U8,     u8),
+    (U16,    u16),
+    (U32,    u32),
+    (U64,    u64),
+    (U128,   u128),
+    (I8,     i8),
+    (I16,    i16),
+    (I32,    i32),
+    (I64,    i64),
+    (I128,   i128),
+    (String, String)
 }
 
 impl Display for Output {
