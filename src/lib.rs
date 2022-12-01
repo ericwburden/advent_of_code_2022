@@ -51,7 +51,7 @@ macro_rules! impl_output_from {
     };
 }
 
-impl_output_from!{
+impl_output_from! {
     (U8,     u8),
     (U16,    u16),
     (U32,    u32),
