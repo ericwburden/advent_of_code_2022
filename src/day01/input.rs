@@ -19,8 +19,7 @@ pub fn read() -> Input {
 /// Parse a "chunk" of lines representing an individual
 /// Elf's snacks into the total calories for that Elf.
 fn try_parse_elf_calories(value: &str) -> Result<u32, std::num::ParseIntError> {
-    // Iterate over each line, convert it to a u32 (ignoring any
-    // that fail to parse), and summing the results.
+    // Iterate over each line, convert it to a u32, and sum the results
     let mut total = 0;
     for line in value.lines() {
         total += line.parse::<u32>()?;
