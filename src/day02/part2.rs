@@ -1,4 +1,4 @@
-use super::shared::{Outcome, Throw};
+use super::shared::{Outcome, Shape};
 use crate::day02::{Input, Output};
 
 /// Solve part two
@@ -13,27 +13,27 @@ pub fn solve(input: &Input) -> Output {
         .into()
 }
 
-/// Trait for converting a character from the input into a `Throw`.
+/// Trait for converting a character from the input into a `Shape`.
 /// I'm using a Trait here so that I can use the same function names
 /// in the two different parts but have them behave differently, while 
 /// sharing some base functionality between parts.
-trait TryIntoThrow {
+trait TryIntoShape {
     type Error;
-    fn try_into_throw(&self) -> Result<Throw, Self::Error>;
+    fn try_into_shape(&self) -> Result<Shape, Self::Error>;
 }
 
-impl TryIntoThrow for char {
+impl TryIntoShape for char {
     type Error = &'static str;
 
-    /// Attempt to convert an input character into a `Throw`. This time,
-    /// we know that 'X', 'Y', and 'Z' do not represent throws, so we don't
+    /// Attempt to convert an input character into a `Shape`. This time,
+    /// we know that 'X', 'Y', and 'Z' do not represent shapes, so we don't
     /// try to convert them.
-    fn try_into_throw(&self) -> Result<Throw, Self::Error> {
+    fn try_into_shape(&self) -> Result<Shape, Self::Error> {
         match self {
-            'A' => Ok(Throw::Rock),
-            'B' => Ok(Throw::Paper),
-            'C' => Ok(Throw::Scissors),
-            _ => Err("Character cannot be converted to `Throw`!"),
+            'A' => Ok(Shape::Rock),
+            'B' => Ok(Shape::Paper),
+            'C' => Ok(Shape::Scissors),
+            _ => Err("Character cannot be converted to `Shape`!"),
         }
     }
 }
@@ -50,15 +50,15 @@ impl TryIntoOutcome for (char, char) {
 
     #[rustfmt::skip] // I _still like_ my pretty match statement below
     fn try_into_outcome(&self) -> Result<Outcome, Self::Error> {
-        // Now, we only convert the first character into a `Throw`
+        // Now, we only convert the first character into a `Shape`
         let (ch1, result) = self;
-        let opponent = ch1.try_into_throw()?;
+        let opponent = ch1.try_into_shape()?;
 
         // Using the mapping that 'X' means we lose, 'Y' means we draw, and 
-        // 'Z' means we win, determine the outcome of the game and what throw
+        // 'Z' means we win, determine the outcome of the game and what shape
         // you the player need to make to achieve that outcome, and return 
         // the `Outcome`.
-        use Throw::*;
+        use Shape::*;
         match (opponent, result) {
             (Rock,     'Y') => Ok(Outcome::Draw(Rock)),
             (Rock,     'Z') => Ok(Outcome::Win(Paper)),

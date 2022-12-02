@@ -1,46 +1,46 @@
-//! Common structs and functions for both parts. `Throw` and `Outcome`
+//! Common structs and functions for both parts. `Shape` and `Outcome`
 //! are used in both parts and the functionality for converting them into 
 //! points is unchanged between the parts.
 
-/// Represents a 'throw' in a game of Rock, Paper, Scissors
+/// Represents a 'shape' in a game of Rock, Paper, Scissors
 #[derive(Clone, Copy)]
-pub enum Throw {
+pub enum Shape {
     Rock,
     Paper,
     Scissors,
 }
 
-/// Convert a `Throw` into it's score value
-impl From<Throw> for u32 {
-    fn from(throw: Throw) -> Self {
-        match throw {
-            Throw::Rock => 1,
-            Throw::Paper => 2,
-            Throw::Scissors => 3,
+/// Convert a `Shape` into it's score value
+impl From<Shape> for u32 {
+    fn from(shape: Shape) -> Self {
+        match shape {
+            Shape::Rock => 1,
+            Shape::Paper => 2,
+            Shape::Scissors => 3,
         }
     }
 }
 
 /// Represents the outcome of a game of Rock, Paper, Scissors, from the
-/// perspective of you, the player. Each variant encapsulates the throw
+/// perspective of you, the player. Each variant encapsulates the shape
 /// you made to achieve that outcome.
 pub enum Outcome {
-    Win(Throw),
-    Draw(Throw),
-    Lose(Throw),
+    Win(Shape),
+    Draw(Shape),
+    Lose(Shape),
 }
 
 impl Outcome {
     /// Calculate the score from a given outcome
     pub fn score(&self) -> u32 {
         match self {
-            // 6 points for winning + the points for your throw
+            // 6 points for winning + the points for your shape
             Outcome::Win(t) => 6 + u32::from(*t),
 
-            // 3 points for a draw + the points for your throw
+            // 3 points for a draw + the points for your shape
             Outcome::Draw(t) => 3 + u32::from(*t),
 
-            // 0 points for losing + the points for your throw
+            // 0 points for losing + the points for your shape
             Outcome::Lose(t) => u32::from(*t),
         }
     }
