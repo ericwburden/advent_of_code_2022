@@ -44,7 +44,7 @@ impl TryFrom<ItemSet> for Item {
 
 impl Item {
     /// Calculate the priority of the `Item`. Recall each `Item` is represented
-    /// by a single bit shifted left by priority, so priority is just the 
+    /// by a single bit shifted left by priority, so priority is just the
     /// number of trailing zeros.
     pub fn priority(&self) -> u32 {
         self.0.trailing_zeros()

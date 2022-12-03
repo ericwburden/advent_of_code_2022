@@ -7,7 +7,7 @@ const INPUT: &str = include_str!("../../input/03/input.txt");
 // These constants are used in that math. For references, ASCII 'a' corresponds
 // to a value of 97, and ASCII 'A' corresponds to a value of 65.
 const LOWERCASE_OFFSET: u32 = 96; // 'a' -> 97 -  1 (priority of 'a') = 96
-const CAPITAL_OFFSET: u32 = 38;   // 'A' -> 65 - 26 (priority of 'A') = 38
+const CAPITAL_OFFSET: u32 = 38; // 'A' -> 65 - 26 (priority of 'A') = 38
 
 /// A `Rucksack` represents a pack carried by an elf with two different,
 /// separated sets of `Item`s.
@@ -37,7 +37,7 @@ impl TryFrom<&str> for Rucksack {
 }
 
 /// An `ItemSet` represents the unique items held in each compartment of a
-/// `Rucksack`. The goal is to provide functionality equivalent to a 
+/// `Rucksack`. The goal is to provide functionality equivalent to a
 /// `HashSet<Item>` (at least as much as we need) without the overhead
 /// of an actual `HashSet`. This is accomplished by assigning each type of
 /// `Item` to a particular bit in the inner `u64`.
