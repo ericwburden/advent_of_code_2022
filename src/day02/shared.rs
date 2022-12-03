@@ -1,5 +1,5 @@
 //! Common structs and functions for both parts. `Shape` and `Outcome`
-//! are used in both parts and the functionality for converting them into 
+//! are used in both parts and the functionality for converting them into
 //! points is unchanged between the parts.
 
 /// Represents a 'shape' in a game of Rock, Paper, Scissors

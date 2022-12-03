@@ -15,7 +15,7 @@ pub fn solve(input: &Input) -> Output {
 
 /// Trait for converting a character from the input into a `Shape`.
 /// I'm using a Trait here so that I can use the same function names
-/// in the two different parts but have them behave differently, while 
+/// in the two different parts but have them behave differently, while
 /// sharing some base functionality between parts.
 trait TryIntoShape {
     type Error;
