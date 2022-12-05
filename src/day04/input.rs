@@ -71,10 +71,7 @@ const INPUT: &str = include_str!("../../input/04/input.txt");
 /// any lines that return an Error. We'll check in the tests to make sure every line
 /// is parsed.
 pub fn read() -> Input {
-    INPUT
-        .lines()
-        .flat_map(arp_parser::parse)
-        .collect()
+    INPUT.lines().flat_map(arp_parser::parse).collect()
 }
 
 #[cfg(test)]
