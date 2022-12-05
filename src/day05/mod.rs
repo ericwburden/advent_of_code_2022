@@ -3,7 +3,7 @@ pub mod part1;
 pub mod part2;
 
 use crate::{Output, Part};
-use input::{CrateStacks, Instruction};
+use input::{CrateStack, CrateStacks, Instruction};
 
 pub type Input = (CrateStacks, Vec<Instruction>);
 
