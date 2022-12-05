@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::ops::{Index, IndexMut};
 use crate::day05::Input;
 use anyhow::{anyhow, bail, Error, Result};
@@ -11,11 +12,20 @@ use nom::{
     Finish, IResult,
 };
 
-#[derive(Debug, Default, Clone)]
-pub struct CrateStacks(pub [Vec<char>; 9]);
+#[derive(Debug, Clone)]
+pub struct CrateStacks(pub [RefCell<Vec<char>>; 9]);
+
+impl Default for CrateStacks {
+    fn default() -> Self {
+        let stack = RefCell::new(Vec::with_capacity(64));
+        CrateStacks([stack.clone(), stack.clone(), stack.clone(),
+        stack.clone(), stack.clone(), stack.clone(),
+        stack.clone(), stack.clone(), stack])
+    }
+}
 
 impl Index<usize> for CrateStacks {
-    type Output = Vec<char>;
+    type Output = RefCell<Vec<char>>;
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.0[index]
@@ -49,17 +59,17 @@ impl CrateStackParser {
 
     fn parse(s: &str) -> Result<CrateStacks> {
         let (_, rows) = Self::crate_rows(s).map_err(|_| anyhow!("Cannot parse crate rows!"))?;
-        let mut stacks: [Vec<char>; 9] = Default::default();
+        let mut stacks = CrateStacks::default();
 
         for row in rows.iter().rev() {
             for (idx, maybe_crate) in row.iter().enumerate() {
                 if let Some(label) = maybe_crate {
-                    stacks[idx].push(*label);
+                    stacks[idx].borrow_mut().push(*label);
                 }
             }
         }
 
-        Ok(CrateStacks(stacks))
+        Ok(stacks)
     }
 }
 
@@ -130,8 +140,8 @@ mod test {
         // Check the crate stacks first
         let crate_stacks_first_expected = vec!['Q', 'W', 'P', 'S', 'Z', 'R', 'H', 'D'];
         let crate_stacks_last_expected = vec!['W', 'P', 'V', 'M', 'B', 'H'];
-        assert_eq!(crate_stacks[0], crate_stacks_first_expected);
-        assert_eq!(crate_stacks[8], crate_stacks_last_expected);
+        assert_eq!(crate_stacks[0].borrow().to_owned(), crate_stacks_first_expected);
+        assert_eq!(crate_stacks[8].borrow().to_owned(), crate_stacks_last_expected);
 
         // Check the instructions
         assert_eq!(instructions.len(), 503);

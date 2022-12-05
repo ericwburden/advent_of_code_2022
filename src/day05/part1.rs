@@ -15,8 +15,8 @@ impl Execute for CrateStacks {
     fn execute(&mut self, instruction: &Instruction) {
         let Instruction { count, origin, destination } = instruction;
         for _ in 0..*count {
-            if let Some(ch) = self[(*origin - 1) as usize].pop() {
-                self[(*destination - 1) as usize].push(ch);
+            if let Some(ch) = self[(*origin - 1) as usize].borrow_mut().pop() {
+                self[(*destination - 1) as usize].borrow_mut().push(ch);
             }
         }
     }
@@ -26,7 +26,7 @@ impl CrateStacks {
     pub fn message(&mut self) -> String {
         let mut out = String::new();
         for stack in self.0.iter_mut() {
-            if let Some(ch) = stack.pop() {
+            if let Some(ch) = stack.borrow_mut().pop() {
                 out.push(ch);
             }
         }
