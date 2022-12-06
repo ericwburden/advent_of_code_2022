@@ -1,14 +1,4 @@
 use crate::day05::Input;
-use anyhow::{anyhow, bail, Error, Result};
-use nom::{
-    branch::alt,
-    bytes::complete::{tag, take, take_while},
-    character::complete::{digit1, satisfy, u8},
-    combinator::{into, map, not, opt, recognize, value, verify},
-    multi::{many1, separated_list1},
-    sequence::{delimited, preceded, tuple},
-    Finish, IResult,
-};
 use std::cell::RefCell;
 use std::ops::{Index, IndexMut};
 
@@ -61,10 +51,12 @@ impl IndexMut<usize> for CrateStacks {
     }
 }
 
-/// This time, I'm bundling all the parsers under an empty struct
-struct CrateStackParser();
+/// Module to wrap nom parsers for crates and stacks of crates
+mod parse_crates {
+    use super::*;
+    use nom::{character::complete::satisfy, sequence::delimited, bytes::complete::tag, combinator::{map, value}, branch::alt, multi::separated_list1, IResult};
+    use anyhow::{anyhow, Result};
 
-impl CrateStackParser {
     /// Nom parser to parse "[A]" -> 'A'
     fn crate_label(s: &str) -> IResult<&str, char> {
         let mut crate_char = satisfy(|c| c.is_ascii_uppercase());
@@ -73,7 +65,7 @@ impl CrateStackParser {
 
     /// Nom parser to parse "[A]     [B] [C]" -> [Some('A'), None, Some('B'), Some('C')]
     fn crate_row(s: &str) -> IResult<&str, Vec<Option<char>>> {
-        let mut maybe_crate = map(Self::crate_label, Some);
+        let mut maybe_crate = map(crate_label, Some);
         let mut empty_space = value(None, tag("   "));
         let mut crate_or_empty = alt((maybe_crate, empty_space));
         separated_list1(tag(" "), crate_or_empty)(s)
@@ -82,13 +74,13 @@ impl CrateStackParser {
     /// Nom parser to parse multiple newline-separated rows of crates into a list
     /// of rows, specified by `crate_row`.
     fn crate_rows(s: &str) -> IResult<&str, Vec<Vec<Option<char>>>> {
-        separated_list1(tag("\n"), Self::crate_row)(s)
+        separated_list1(tag("\n"), crate_row)(s)
     }
 
     /// Parses the first section of the input into a `CrateStacks`, where each 
     /// `CrateStack` contained includes the crates from each column of the input.
-    fn parse(s: &str) -> Result<CrateStacks> {
-        let (_, rows) = Self::crate_rows(s).map_err(|_| anyhow!("Cannot parse crate rows!"))?;
+    pub fn parse(s: &str) -> Result<CrateStacks> {
+        let (_, rows) = crate_rows(s).map_err(|_| anyhow!("Cannot parse crate rows!"))?;
         let mut stacks = CrateStacks::default();
 
         for row in rows.iter().rev() {
@@ -126,10 +118,12 @@ impl From<(u8, u8, u8)> for Instruction {
     }
 }
 
-/// I've bundled the parser functions for parsing `Instruction`s into this empty struct
-struct InstructionParser();
+/// Module wrapping nom parsers for instructions
+mod parse_instructions {
+    use super::*;
+    use nom::{IResult, bytes::complete::take_while, character::complete::u8, sequence::{preceded, tuple}, combinator::into};
+    use anyhow::{anyhow, Result};
 
-impl InstructionParser {
     /// Nom parser for a string of non-digit characters
     fn not_number(s: &str) -> IResult<&str, &str> {
         take_while(|c: char| c.is_alphabetic() || c.is_whitespace())(s)
@@ -146,16 +140,16 @@ impl InstructionParser {
     /// Nom parser to convert "move 1 from 2 to 3" -> (1, 2, 3)
     fn instruction(s: &str) -> IResult<&str, Instruction> {
         into(tuple((
-            Self::labeled_u8,
-            Self::labeled_u8,
-            Self::labeled_u8,
+            labeled_u8,
+            labeled_u8,
+            labeled_u8,
         )))(s)
     }
 
     /// Parse a line of instruction into an `Instruction`
-    fn parse(s: &str) -> Result<Instruction> {
+    pub fn parse(s: &str) -> Result<Instruction> {
         let (_, result) =
-            Self::instruction(s).map_err(|_| anyhow!("Cannot parse line to an Instruction!"))?;
+            instruction(s).map_err(|_| anyhow!("Cannot parse line to an Instruction!"))?;
         Ok(result)
     }
 }
@@ -169,12 +163,12 @@ pub fn read() -> Input {
     let (mut first_chunk, mut second_chunk) = INPUT.split_once("\n\n").unwrap();
 
     // Parse the first section into a `CrateStacks`
-    let crate_stacks = CrateStackParser::parse(first_chunk).expect("Failed to parse crate stacks!");
+    let crate_stacks = parse_crates::parse(first_chunk).expect("Failed to parse crate stacks!");
 
     // Parse the second section into a list of `Instruction`s
     let instructions = second_chunk
         .lines()
-        .flat_map(InstructionParser::parse)
+        .flat_map(parse_instructions::parse)
         .collect();
 
     // Return the pair of parsed input sections
