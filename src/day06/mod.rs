@@ -4,9 +4,10 @@ pub mod part2;
 pub mod shared;
 
 use crate::{Output, Part};
-use shared::{ToBitMarker, SequenceDetector};
+use input::Signal;
+use shared::SequenceDetector;
 
-pub type Input = &'static str;
+pub type Input = Vec<Signal>;
 
 pub fn run(part: Part) -> Output {
     let input = input::read();

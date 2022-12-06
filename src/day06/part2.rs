@@ -1,9 +1,14 @@
-use crate::day06::{Input, Output, ToBitMarker, SequenceDetector};
+use crate::day06::{Input, Output, SequenceDetector};
 
+/// Solve Day 6, Part 2
 pub fn solve(input: &Input) -> Output {
+    // Instantiate a detector for sequences of length 14
     let mut detector: SequenceDetector<14> = SequenceDetector::new();
-    for (idx, ch) in input.chars().enumerate() {
-        if detector.detect(ch) { return (idx as u32 + 1).into(); }
+
+    // Pass each `Signal` in the input to the detector. Return early
+    // with the index (plus one) if a unique sequence is detected.
+    for (idx, signal) in input.iter().enumerate() {
+        if detector.detect(*signal) { return (idx as u32 + 1).into(); }
     }
     panic!("No start-of-packet marker detected!")
 }
