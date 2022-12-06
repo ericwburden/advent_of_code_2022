@@ -10,5 +10,5 @@ pub fn solve(input: &Input) -> Output {
     for (idx, signal) in input.iter().enumerate() {
         if detector.detect(*signal) { return (idx as u32 + 1).into(); }
     }
-    panic!("No start-of-packet marker detected!")
+    panic!("No start-of-message marker detected!")
 }
