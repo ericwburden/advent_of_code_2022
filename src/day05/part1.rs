@@ -20,7 +20,7 @@ impl CrateStack {
     /// To pop a crate from the `CrateStack`, bump the height down and return the
     /// character from the top of the stack. Note, this doesn't actually _remove_
     /// the character from the top of the stack, but the next crate pushed to
-    /// this stack will overwrite it. So long as we stick to pushing and popping, 
+    /// this stack will overwrite it. So long as we stick to pushing and popping,
     /// we won't have any issues.
     pub fn pop(&mut self) -> char {
         if self.height == 0 {

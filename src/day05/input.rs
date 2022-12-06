@@ -25,7 +25,7 @@ impl Default for CrateStack {
 }
 
 /// Represents the collected stacks of crates. We know we have 9 total stacks from
-/// the input, so this data structure can accommodate up to 9 stacks of crates. 
+/// the input, so this data structure can accommodate up to 9 stacks of crates.
 /// Each stack of crates is wrapped in `RefCell` to facilitate moving crates directly
 /// from one stack to the other without needing a buffer in between. We'll use this
 /// functionality in part two.
@@ -54,8 +54,16 @@ impl IndexMut<usize> for CrateStacks {
 /// Module to wrap nom parsers for crates and stacks of crates
 mod parse_crates {
     use super::*;
-    use nom::{character::complete::satisfy, sequence::delimited, bytes::complete::tag, combinator::{map, value}, branch::alt, multi::separated_list1, IResult};
     use anyhow::{anyhow, Result};
+    use nom::{
+        branch::alt,
+        bytes::complete::tag,
+        character::complete::satisfy,
+        combinator::{map, value},
+        multi::separated_list1,
+        sequence::delimited,
+        IResult,
+    };
 
     /// Nom parser to parse "[A]" -> 'A'
     fn crate_label(s: &str) -> IResult<&str, char> {
@@ -77,7 +85,7 @@ mod parse_crates {
         separated_list1(tag("\n"), crate_row)(s)
     }
 
-    /// Parses the first section of the input into a `CrateStacks`, where each 
+    /// Parses the first section of the input into a `CrateStacks`, where each
     /// `CrateStack` contained includes the crates from each column of the input.
     pub fn parse(s: &str) -> Result<CrateStacks> {
         let (_, rows) = crate_rows(s).map_err(|_| anyhow!("Cannot parse crate rows!"))?;
@@ -94,7 +102,6 @@ mod parse_crates {
         Ok(stacks)
     }
 }
-
 
 /// An Instruction represents the instructions to move one or more crates from
 /// one stack to another. Includes how many crates to move, which stack to move
@@ -121,8 +128,14 @@ impl From<(u8, u8, u8)> for Instruction {
 /// Module wrapping nom parsers for instructions
 mod parse_instructions {
     use super::*;
-    use nom::{IResult, bytes::complete::take_while, character::complete::u8, sequence::{preceded, tuple}, combinator::into};
     use anyhow::{anyhow, Result};
+    use nom::{
+        bytes::complete::take_while,
+        character::complete::u8,
+        combinator::into,
+        sequence::{preceded, tuple},
+        IResult,
+    };
 
     /// Nom parser for a string of non-digit characters
     fn not_number(s: &str) -> IResult<&str, &str> {
@@ -139,11 +152,7 @@ mod parse_instructions {
 
     /// Nom parser to convert "move 1 from 2 to 3" -> (1, 2, 3)
     fn instruction(s: &str) -> IResult<&str, Instruction> {
-        into(tuple((
-            labeled_u8,
-            labeled_u8,
-            labeled_u8,
-        )))(s)
+        into(tuple((labeled_u8, labeled_u8, labeled_u8)))(s)
     }
 
     /// Parse a line of instruction into an `Instruction`
@@ -179,7 +188,7 @@ pub fn read() -> Input {
 mod test {
     use super::*;
 
-    /// Used to instantiate `CrateStack`s from character arrays. Really only used 
+    /// Used to instantiate `CrateStack`s from character arrays. Really only used
     /// for testing, but handy for that.
     impl<const N: usize> From<[char; N]> for CrateStack {
         fn from(value: [char; N]) -> Self {
