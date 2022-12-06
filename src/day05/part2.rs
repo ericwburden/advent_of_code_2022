@@ -2,7 +2,7 @@ use std::ops::RangeFrom;
 
 use crate::day05::{CrateStack, CrateStacks, Input, Instruction, Output};
 
-/// Solve Day 05, Part 1
+/// Solve Day 05, Part 2
 pub fn solve(input: &Input) -> Output {
     // Split up the input into the stacks of crates and the instructions,
     // then clone the crate stacks struct so we can have a mutable copy.
