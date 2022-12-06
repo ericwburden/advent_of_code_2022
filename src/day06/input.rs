@@ -1,4 +1,3 @@
-use std::fmt::Display;
 use anyhow::{bail, Error};
 
 use crate::day06::Input;
