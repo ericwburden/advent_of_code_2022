@@ -1,8 +1,14 @@
 use crate::day05::{CrateStack, CrateStacks, Input, Instruction, Output};
 
+/// Solve Day 05, Part 1
 pub fn solve(input: &Input) -> Output {
+    // Split up the input into the stacks of crates and the instructions,
+    // then clone the crate stacks struct so we can have a mutable copy.
     let (crate_stacks, instructions) = input;
     let mut crate_stacks = crate_stacks.clone();
+
+    // Execute each instruction on the `CrateStacks`, and return the
+    // String resulting from the top crate in each stack
     instructions.iter().for_each(|i| crate_stacks.execute(i));
     crate_stacks.message().into()
 }
