@@ -1,4 +1,4 @@
-use crate::day07::{FileSystem, FileSystemObj, Input, Output};
+use crate::day07::{DirRef, FileSystem, FileSystemObj, Input, Output};
 
 /// Solve Day 7, Part 1
 pub fn solve(input: &Input) -> Output {
@@ -18,10 +18,9 @@ impl FileSystem<'_> {
         let mut sizes = Vec::new();
 
         // Walk the file system tree structure, adding directory sizes to `sizes`
-        fn walk(obj: FileSystemObj, sizes: &mut Vec<u32>) {
-            let FileSystemObj::Dir(dir) = obj else { return; };
+        fn walk(dir: DirRef, sizes: &mut Vec<u32>) {
             sizes.push(dir.borrow().size);
-            for item in dir.borrow().contents.iter() {
+            for item in dir.borrow().dirs.iter() {
                 walk(item.clone(), sizes);
             }
         }

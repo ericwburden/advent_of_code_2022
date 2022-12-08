@@ -21,9 +21,6 @@ impl FileSystem<'_> {
     /// Get the size of the root directory, which is the total size of the files
     /// in our file system.
     fn total_size(&self) -> u32 {
-        match &self.0 {
-            FileSystemObj::Dir(d) => d.borrow().size,
-            FileSystemObj::File(_) => unreachable!(),
-        }
+        self.0.borrow().size
     }
 }

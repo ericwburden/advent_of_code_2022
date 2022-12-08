@@ -4,25 +4,50 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 /// Represents a directory in the file tree, including the directory label,
-/// a list of the directory's contents, and the total size of all the files
-/// contained in the directory and all sub-directories.
+/// a list of the contained directories, a list of the contained files, and
+/// the total size of all the files contained in the directory and all
+/// sub-directories.
 #[derive(Debug, Clone)]
 pub struct Dir<'a> {
     pub label: &'a str,
-    pub contents: Vec<FileSystemObj<'a>>,
+    pub dirs: Vec<DirRef<'a>>,
+    pub files: Vec<File<'a>>,
     pub size: u32,
 }
+
+/// A type alias for a Dir wrapped in Rc, which allows for the Dir to have multiple
+/// owners, and RefCell, which allows for runtime-checked mutable borrows of the Dir.
+/// Together, these two properties allow us to recursively nest `Dir`s within `Dir`s.
+pub type DirRef<'a> = Rc<RefCell<Dir<'a>>>;
 
 impl<'a> Dir<'a> {
     /// Create an empty directory with the given label
     fn from(label: &'a str) -> Self {
-        let contents = Vec::new();
+        let dirs = Vec::new();
+        let files = Vec::new();
         let size = 0;
         Dir {
             label,
-            contents,
+            dirs,
+            files,
             size,
         }
+    }
+
+    /// Search the contents of a file system object and return the child object
+    /// indicated by `label`.
+    fn get_child(&self, label: &str) -> Option<DirRef<'a>> {
+        self
+           .dirs
+           .iter()
+           .find(|c| c.borrow().label == label)
+           .cloned()
+    }
+
+    /// Add a nested directory to this directory
+    fn add_dir(&mut self, dir: Dir<'a>) {
+        let dir_ref = Rc::new(RefCell::new(dir));
+        self.dirs.push(dir_ref);
     }
 }
 
@@ -37,56 +62,8 @@ pub struct File<'a> {
 /// are in Rc<RefCell<T>> wrappers to TODO
 #[derive(Debug, Clone)]
 pub enum FileSystemObj<'a> {
-    Dir(Rc<RefCell<Dir<'a>>>),
-    File(Rc<RefCell<File<'a>>>),
-}
-
-impl<'a> FileSystemObj<'a> {
-    /// Create a wrapped Dir representing the root folder of the file system
-    fn root() -> Self {
-        let dir = Dir::from("/");
-        FileSystemObj::Dir(Rc::new(RefCell::new(dir)))
-    }
-
-    /// Return the label applied to a directory or file
-    fn label(&self) -> &str {
-        match self {
-            FileSystemObj::Dir(d) => d.borrow().label,
-            FileSystemObj::File(f) => f.borrow().label,
-        }
-    }
-
-    /// Search the contents of a file system object and return the child object
-    /// indicated by `label`.
-    fn get_child(&self, label: &str) -> Option<FileSystemObj<'a>> {
-        match self {
-            // Files don't have children
-            FileSystemObj::File(_) => None,
-
-            // Just iterate through the contents of the directory and return
-            // the first item whose label matches the given label.Return None
-            // if the directory doesn't contain any item with the given label.
-            FileSystemObj::Dir(dir) => dir
-                .borrow()
-                .contents
-                .iter()
-                .find(|c| c.label() == label)
-                .cloned(),
-        }
-    }
-
-    /// Add items to the contents of this object
-    fn add_contents<T>(&mut self, iter: T)
-    where
-        T: IntoIterator<Item = FileSystemObj<'a>>,
-    {
-        match self {
-            FileSystemObj::File(_) => (),
-            FileSystemObj::Dir(dir) => {
-                dir.borrow_mut().contents.extend(iter);
-            }
-        }
-    }
+    Dir(DirRef<'a>),
+    File(File<'a>),
 }
 
 /// Represents a command from the input file. Commands come in one of four flavors.
@@ -113,17 +90,17 @@ mod parser {
     };
 
     /// Nom parser for "dir bacon" -> Rc<RefCell<Dir { label: "bacon" }>>
-    fn dir(s: &str) -> IResult<&str, Rc<RefCell<Dir>>> {
+    fn dir(s: &str) -> IResult<&str, DirRef> {
         let (s, label) = preceded(tag("dir "), alpha1)(s)?;
         let dir = Dir::from(label);
         Ok((s, Rc::new(RefCell::new(dir))))
     }
 
-    /// Nom parser for "123 eggs.txt" -> Rc<RefCell<File { size: 123, label: "eggs.txt" }>> 
-    fn file(s: &str) -> IResult<&str, Rc<RefCell<File>>> {
+    /// Nom parser for "123 eggs.txt" -> File { size: 123, label: "eggs.txt" } 
+    fn file(s: &str) -> IResult<&str, File> {
         let (s, (size, label)) = separated_pair(u32, space1, take_until("\n"))(s)?;
         let file = File { size, label };
-        Ok((s, Rc::new(RefCell::new(file))))
+        Ok((s, file))
     }
 
     /// Nom parser for parsing one of the file objects listed from an `ls` command
@@ -170,13 +147,13 @@ mod parser {
 /// Represents the entire filesystem, which is a linked tree of all the filesystem
 /// objects. Contains the root node.
 #[derive(Debug, Clone)]
-pub struct FileSystem<'a>(pub FileSystemObj<'a>);
+pub struct FileSystem<'a>(pub DirRef<'a>);
 
 impl<'a> TryFrom<Vec<Cmd<'a>>> for FileSystem<'a> {
     type Error = Error;
 
     fn try_from(commands: Vec<Cmd<'a>>) -> Result<Self, Self::Error> {
-        let root = FileSystemObj::root();
+        let root = Rc::new(RefCell::new(Dir::from("/")));
         let mut open_dirs = vec![root.clone()];
 
         for command in commands {
@@ -190,7 +167,7 @@ impl<'a> TryFrom<Vec<Cmd<'a>>> for FileSystem<'a> {
                 // from the current directory's contents and pushing that reference
                 // to the end of the list of open directories.
                 Cmd::MoveIn(dir) => {
-                    let dir = current_dir.get_child(dir.label).unwrap();
+                    let dir = current_dir.borrow_mut().get_child(dir.label).unwrap();
                     open_dirs.push(dir);
                 }
 
@@ -208,7 +185,12 @@ impl<'a> TryFrom<Vec<Cmd<'a>>> for FileSystem<'a> {
 
                 // Process a command to list contents by adding all the files and
                 // directories listed as children of the currently open directory.
-                Cmd::List(mut objs) => current_dir.add_contents(objs.drain(..)),
+                Cmd::List(mut objs) => for obj in objs.drain(..) {
+                    match obj {
+                        FileSystemObj::Dir(d) => current_dir.borrow_mut().dirs.push(d),
+                        FileSystemObj::File(f) => current_dir.borrow_mut().files.push(f),
+                    }
+                },
             }
         }
         Ok(FileSystem(root))
@@ -219,23 +201,27 @@ impl FileSystem<'_> {
     /// Fill in the sizes of all the directories in the file system by recursively
     /// walking the file system.
     fn calculate_directory_sizes(&self) {
-        fn size(obj: FileSystemObj) -> u32 {
-            match obj {
-                // Base case, return the size of a file
-                FileSystemObj::File(file) => file.borrow().size,
 
-                // Otherwise, recursively calculate the total size of all files
-                // contained in this directory and its subdirectories and return
-                // that total.
-                FileSystemObj::Dir(dir) => {
-                    let mut total = 0;
-                    for child in dir.borrow().contents.iter() {
-                        total += size(child.clone());
-                    }
-                    dir.borrow_mut().size = total;
-                    total
-                }
+        // Recursively walk the file system tree and fill in the sizes for
+        // each directory.
+        fn size(dir: DirRef) -> u32 {
+            let mut total = 0;
+
+            // Add the sizes of all the files in this directory
+            for file in dir.borrow().files.iter() {
+                total += file.size;
             }
+
+            // Add (and fill in) recursively all the sub-directories in this
+            // directory
+            for child_dir in dir.borrow().dirs.iter() {
+                total += size(child_dir.clone());
+            }
+
+            // Update this directory
+            dir.borrow_mut().size = total;
+
+            total
         }
 
         // Perform the walk
@@ -272,7 +258,7 @@ mod test {
                         match obj {
                             FileSystemObj::Dir(dir) => write!(f, "dir {}", dir.borrow().label)?,
                             FileSystemObj::File(file) => {
-                                write!(f, "{} {}", file.borrow().size, file.borrow().label)?
+                                write!(f, "{} {}", file.size, file.label)?
                             }
                         }
                     }
