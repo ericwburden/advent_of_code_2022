@@ -1,5 +1,5 @@
-use std::ops::{BitAnd, BitOrAssign};
 use super::input::Signal;
+use std::ops::{BitAnd, BitOrAssign};
 
 /// Implement bitwise _and_ for `Signal`s
 impl BitAnd for Signal {
@@ -17,7 +17,7 @@ impl BitOrAssign for Signal {
     }
 }
 
-/// Represents a 'detector' for unique sequences of `Signal`s of a constant length. 
+/// Represents a 'detector' for unique sequences of `Signal`s of a constant length.
 /// Holds a buffer of the signals encountered so far and inserts new signals into
 /// that buffer by wrapping around the length of the buffer.
 #[derive(Debug)]
@@ -38,7 +38,7 @@ impl<const N: usize> SequenceDetector<N> {
     /// Given a `Signal`, indicates whether the most recent `N` signals detected
     /// comprises a unique sequence.
     pub fn detect(&mut self, signal: Signal) -> bool {
-        // Add the signal to the buffer and bump the marker over by one to 
+        // Add the signal to the buffer and bump the marker over by one to
         // receive the next signal.
         self.buffer[self.mark] = signal;
         self.mark = (self.mark + 1) % N;
@@ -46,13 +46,17 @@ impl<const N: usize> SequenceDetector<N> {
         // If the marker points to an empty signal in the buffer, this means
         // the buffer isn't full yet and we definitely haven't found `N` unique
         // signal inputs.
-        if self.buffer[self.mark] == Signal(0) { return false; }
+        if self.buffer[self.mark] == Signal(0) {
+            return false;
+        }
 
         // Check the buffer for unique signals. If any duplicate `Signal`s are
         // detected, return false early. If all `Signal`s _are_ unique, return true.
         let mut bits = Signal(0);
         for bit in self.buffer.iter() {
-            if *bit & bits > Signal(0) { return false; }
+            if *bit & bits > Signal(0) {
+                return false;
+            }
             bits |= *bit;
         }
         true

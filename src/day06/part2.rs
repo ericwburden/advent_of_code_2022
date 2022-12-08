@@ -8,7 +8,9 @@ pub fn solve(input: &Input) -> Output {
     // Pass each `Signal` in the input to the detector. Return early
     // with the index (plus one) if a unique sequence is detected.
     for (idx, signal) in input.iter().enumerate() {
-        if detector.detect(*signal) { return (idx as u32 + 1).into(); }
+        if detector.detect(*signal) {
+            return (idx as u32 + 1).into();
+        }
     }
     panic!("No start-of-message marker detected!")
 }
