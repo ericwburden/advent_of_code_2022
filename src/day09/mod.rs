@@ -5,7 +5,7 @@ pub mod shared;
 
 use crate::{Output, Part};
 use input::Motion;
-use shared::Position;
+use shared::Knot;
 
 pub type Input = Vec<Motion>;
 
