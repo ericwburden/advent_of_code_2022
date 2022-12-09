@@ -13,7 +13,6 @@ pub fn solve(input: &Input) -> Output {
 
     // For each tree location in the forest...
     for (row_idx, col_idx) in indices {
-
         // If we're on an edge of the map, just skip it. It'll be zero regardless.
         if row_idx == 0
             || col_idx == 0
