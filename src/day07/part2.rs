@@ -1,6 +1,6 @@
 use crate::day07::{FileSystem, FileSystemObj, Input, Output};
 
-/// Solve Day 7, Part 2 
+/// Solve Day 7, Part 2
 pub fn solve(input: &Input) -> Output {
     // Calculate the space we need to free up as described by the puzzle
     let space_remaining = 70_000_000 - input.total_size();
