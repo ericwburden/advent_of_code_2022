@@ -37,11 +37,10 @@ impl<'a> Dir<'a> {
     /// Search the contents of a file system object and return the child object
     /// indicated by `label`.
     fn get_child(&self, label: &str) -> Option<DirRef<'a>> {
-        self
-           .dirs
-           .iter()
-           .find(|c| c.borrow().label == label)
-           .cloned()
+        self.dirs
+            .iter()
+            .find(|c| c.borrow().label == label)
+            .cloned()
     }
 
     /// Add a nested directory to this directory
@@ -96,7 +95,7 @@ mod parser {
         Ok((s, Rc::new(RefCell::new(dir))))
     }
 
-    /// Nom parser for "123 eggs.txt" -> File { size: 123, label: "eggs.txt" } 
+    /// Nom parser for "123 eggs.txt" -> File { size: 123, label: "eggs.txt" }
     fn file(s: &str) -> IResult<&str, File> {
         let (s, (size, label)) = separated_pair(u32, space1, take_until("\n"))(s)?;
         let file = File { size, label };
@@ -108,7 +107,7 @@ mod parser {
         alt((map(dir, FileSystemObj::Dir), map(file, FileSystemObj::File)))(s)
     }
 
-    /// Nom parser for a list of newline separated results from an `ls` command 
+    /// Nom parser for a list of newline separated results from an `ls` command
     fn contents(s: &str) -> IResult<&str, Vec<FileSystemObj>> {
         separated_list1(tag("\n"), fs_obj)(s)
     }
@@ -185,12 +184,14 @@ impl<'a> TryFrom<Vec<Cmd<'a>>> for FileSystem<'a> {
 
                 // Process a command to list contents by adding all the files and
                 // directories listed as children of the currently open directory.
-                Cmd::List(mut objs) => for obj in objs.drain(..) {
-                    match obj {
-                        FileSystemObj::Dir(d) => current_dir.borrow_mut().dirs.push(d),
-                        FileSystemObj::File(f) => current_dir.borrow_mut().files.push(f),
+                Cmd::List(mut objs) => {
+                    for obj in objs.drain(..) {
+                        match obj {
+                            FileSystemObj::Dir(d) => current_dir.borrow_mut().dirs.push(d),
+                            FileSystemObj::File(f) => current_dir.borrow_mut().files.push(f),
+                        }
                     }
-                },
+                }
             }
         }
         Ok(FileSystem(root))
@@ -201,7 +202,6 @@ impl FileSystem<'_> {
     /// Fill in the sizes of all the directories in the file system by recursively
     /// walking the file system.
     fn calculate_directory_sizes(&self) {
-
         // Recursively walk the file system tree and fill in the sizes for
         // each directory.
         fn size(dir: DirRef) -> u32 {
@@ -232,7 +232,7 @@ impl FileSystem<'_> {
 const INPUT: &str = include_str!("../../input/07/input.txt");
 
 /// Read the input by first parsing all the commands from the input file, then
-/// following those commands to build up a tree structure for the file system, 
+/// following those commands to build up a tree structure for the file system,
 /// finally filling in all the directory sizes and returning the file system struct.
 pub fn read<'a>() -> Input<'a> {
     let commands = parser::commands(INPUT).expect("Could not parse input!");
@@ -257,9 +257,7 @@ mod test {
                         writeln!(f)?;
                         match obj {
                             FileSystemObj::Dir(dir) => write!(f, "dir {}", dir.borrow().label)?,
-                            FileSystemObj::File(file) => {
-                                write!(f, "{} {}", file.size, file.label)?
-                            }
+                            FileSystemObj::File(file) => write!(f, "{} {}", file.size, file.label)?,
                         }
                     }
                     write!(f, "")

@@ -3,7 +3,7 @@ pub mod part1;
 pub mod part2;
 
 use crate::{Output, Part};
-use input::{FileSystem, FileSystemObj, DirRef};
+use input::{DirRef, FileSystem, FileSystemObj};
 
 pub type Input<'a> = FileSystem<'a>;
 
