@@ -1,4 +1,4 @@
-use crate::day09::{Input, Motion, Output, Position};
+use crate::day09::{Input, Motion, Output, Knot};
 use std::collections::HashSet;
 use std::ops::AddAssign;
 
@@ -17,26 +17,26 @@ pub fn solve(input: &Input) -> Output {
 /// A struct to encapsulate the state of the rope, with a HashSet to keep up with
 /// the unique positions of the tail.
 pub struct RopeSimulator {
-    head: Position,
-    tail: Position,
-    hist: HashSet<Position>,
+    head: Knot,
+    tail: Knot,
+    hist: HashSet<Knot>,
 }
 
 impl RopeSimulator {
     /// Create a new RopeSimulator with head and tail both at the origin (0, 0) and
     /// initializing the set of tail positions to contain the initial tail position.
     fn new() -> Self {
-        let head = Position::default();
-        let tail = Position::default();
-        let hist = HashSet::from([Position::default()]);
+        let head = Knot::default();
+        let tail = Knot::default();
+        let hist = HashSet::from([Knot::default()]);
         RopeSimulator { head, tail, hist }
     }
 
     /// Move the tail of the rope towards the head according to the rules given by
     /// the puzzle instructions.
     fn move_tail(&mut self) {
-        let Position(hx, hy) = self.head;
-        let Position(tx, ty) = self.tail;
+        let Knot(hx, hy) = self.head;
+        let Knot(tx, ty) = self.tail;
 
         // This `use` statement means we don't have to fully quality all the
         // different `Ordering` variants below. Makes it cleaner to look at.
@@ -47,15 +47,15 @@ impl RopeSimulator {
         // the tail, then we'll match on `(Less, Less)` and move the tail up and
         // to the left.
         self.tail = match (hx.cmp(&tx), hy.cmp(&ty)) {
-            (Less, Less) => Position(tx - 1, ty - 1),
-            (Less, Equal) => Position(tx - 1, ty),
-            (Less, Greater) => Position(tx - 1, ty + 1),
-            (Equal, Less) => Position(tx, ty - 1),
+            (Less, Less) => Knot(tx - 1, ty - 1),
+            (Less, Equal) => Knot(tx - 1, ty),
+            (Less, Greater) => Knot(tx - 1, ty + 1),
+            (Equal, Less) => Knot(tx, ty - 1),
             (Equal, Equal) => unreachable!(),
-            (Equal, Greater) => Position(tx, ty + 1),
-            (Greater, Less) => Position(tx + 1, ty - 1),
-            (Greater, Equal) => Position(tx + 1, ty),
-            (Greater, Greater) => Position(tx + 1, ty + 1),
+            (Equal, Greater) => Knot(tx, ty + 1),
+            (Greater, Less) => Knot(tx + 1, ty - 1),
+            (Greater, Equal) => Knot(tx + 1, ty),
+            (Greater, Greater) => Knot(tx + 1, ty + 1),
         };
 
         // Add the new tail position to the set of tracked tail positions.
