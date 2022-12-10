@@ -1,4 +1,4 @@
-use crate::day09::{Input, Motion, Output, Knot};
+use crate::day09::{Input, Knot, Motion, Output};
 use std::collections::HashSet;
 use std::ops::AddAssign;
 
