@@ -1,11 +1,13 @@
-use crate::day10::{Instruction, Input, Output};
+use crate::day10::{Input, Instruction, Output};
 use std::fmt::{Display, Formatter, Result as FmtResult};
 
 /// Solve Day 10, Part 2
 pub fn solve(input: &Input) -> Output {
     // Boot up a new model of device and run all the instructions on it.
     let mut device = Device::new();
-    input.iter().for_each(|instruction| device.execute(instruction));
+    input
+        .iter()
+        .for_each(|instruction| device.execute(instruction));
 
     // Collect the prettified pixel display into a string and return it
     PrettyPixels(device.pixels).to_string().into()
@@ -21,7 +23,11 @@ struct Device {
 
 impl Device {
     fn new() -> Self {
-        Device { register: 1, cycle: 0, pixels: [false; 240] }
+        Device {
+            register: 1,
+            cycle: 0,
+            pixels: [false; 240],
+        }
     }
 
     // Execute a NOOP instruction. We'll leverage these instructions to update the
@@ -44,7 +50,7 @@ impl Device {
     }
 
     /// Execute an ADDX instruction. Once again, we leverage the NOOP instructions here
-    /// to update the cycle count and the pixels. This time, we need to update the 
+    /// to update the cycle count and the pixels. This time, we need to update the
     /// register _after_ both NOOPs, since pixel drawing happens at the _beginning_
     /// of each cycle.
     fn execute_addx(&mut self, value: i32) {
@@ -84,4 +90,3 @@ impl Display for PrettyPixels {
         write!(f, "") // Finish the print results
     }
 }
-

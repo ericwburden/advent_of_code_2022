@@ -1,11 +1,13 @@
-use crate::day10::{Instruction, Input, Output};
+use crate::day10::{Input, Instruction, Output};
 
 /// Solve Day 10, Part 1
 pub fn solve(input: &Input) -> Output {
     // Instantiate a new device, run all the instructions on it, then return
     // the total signal strength from that device.
     let mut device = Device::new();
-    input.iter().for_each(|instruction| device.execute(instruction));
+    input
+        .iter()
+        .for_each(|instruction| device.execute(instruction));
     device.signal_strength.into()
 }
 
@@ -19,7 +21,11 @@ struct Device {
 
 impl Device {
     fn new() -> Self {
-        Device { register: 1, cycle: 1, signal_strength: 0 }
+        Device {
+            register: 1,
+            cycle: 1,
+            signal_strength: 0,
+        }
     }
 
     // Execute a NOOP instruction. We'll leverage these instructions to update the
