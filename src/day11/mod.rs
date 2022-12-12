@@ -1,7 +1,7 @@
 pub mod input;
-pub mod shared;
 pub mod part1;
 pub mod part2;
+pub mod shared;
 
 use crate::{Output, Part};
 use input::{Monkey, Operation, Rule};

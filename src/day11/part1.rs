@@ -9,7 +9,7 @@ pub fn solve(input: &Input) -> Output {
     // "Play" the game for 20 rounds
     (0..20).for_each(|_| monkey_game.play());
 
-    // Return the maximum monkey business, AKA the product of the 
+    // Return the maximum monkey business, AKA the product of the
     // number of items handled by the two most rambunctious monkeys.
     monkey_game.max_monkey_business().into()
 }
@@ -28,7 +28,10 @@ impl CruelGame {
     fn from(monkeys: &[Monkey]) -> Self {
         let monkeys = monkeys.to_vec();
         let items_in_flight = Vec::new();
-        CruelGame { items_in_flight, monkeys }
+        CruelGame {
+            items_in_flight,
+            monkeys,
+        }
     }
 
     /// "Play" one round of the "game".
@@ -51,7 +54,8 @@ impl CruelGame {
     /// of items handled by each monkey and returns the product of the two
     /// largest totals.
     fn max_monkey_business(&self) -> u64 {
-        let monkey_business: Vec<_> = self.monkeys
+        let monkey_business: Vec<_> = self
+            .monkeys
             .iter()
             .map(|m| m.inspected)
             .sorted_unstable()
