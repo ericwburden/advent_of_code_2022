@@ -29,14 +29,18 @@ impl WorseGame {
         let monkeys = monkeys.to_vec();
         let items_in_flight = Vec::new();
 
-        // In order to keep the computer from blowing its stack, too, we need to 
+        // In order to keep the computer from blowing its stack, too, we need to
         // identify the periodicity of the item worry values. This turns out to
         // be the least common multiple of all the monkey rule divisors by which
         // the monkeys check where to fling your things. Since all these divisors
         // are prime, this is the product of all the divisors.
         let absolute_limit = monkeys.iter().map(|m| m.rule.divisor).product();
 
-        WorseGame { items_in_flight, monkeys, absolute_limit }
+        WorseGame {
+            items_in_flight,
+            monkeys,
+            absolute_limit,
+        }
     }
 
     // The monkeys have upped their level of maliciousness and now pretend to drop
@@ -62,7 +66,8 @@ impl WorseGame {
     /// of items handled by each monkey and returns the product of the two
     /// largest totals.
     fn max_monkey_business(&self) -> u64 {
-        let monkey_business: Vec<_> = self.monkeys
+        let monkey_business: Vec<_> = self
+            .monkeys
             .iter()
             .map(|m| m.inspected)
             .sorted_unstable()
@@ -93,7 +98,7 @@ impl Monkey {
             // Have the monkey decide on a target with a malicious glint in
             // its beady monkey eyes.
             let target = self.rule.check(item);
-            
+
             // Toss the item to its intended target.
             items_in_flight.push((item, target));
 

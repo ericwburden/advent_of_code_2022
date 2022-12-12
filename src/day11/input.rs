@@ -79,7 +79,7 @@ mod parser {
         preceded(space1, tag("Operation: new = old "))(s)
     }
 
-    /// Nom parser for: 
+    /// Nom parser for:
     /// - "Operation: new = old + 5" -> Operation::Add(5)
     /// - "Operation: new = old * 5" -> Operation::Mult(5)
     /// - "Operation: new = old * old" -> Operation::Square
@@ -94,8 +94,8 @@ mod parser {
     /// lines that describe the rules the monkey uses to determine where
     /// to throw your item, used ton construct a `Rule`. For example:
     ///
-    ///   Test: divisible by 17 
-    ///     If true: throw to monkey 0 
+    ///   Test: divisible by 17
+    ///     If true: throw to monkey 0
     ///     If false: throw to monkey 5
     ///
     /// becomes
