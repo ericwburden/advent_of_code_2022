@@ -1,5 +1,6 @@
 use aoc2022lib::*;
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use std::time::Duration;
 
 //-------------------------------------------------------------------------------------
 //Day 01-------------------------------------------------------------------------------
@@ -295,10 +296,9 @@ pub fn benchmark_day12_part02(c: &mut Criterion) {
 }
 
 criterion_group!(
-    day12,
-    benchmark_day12_input,
-    benchmark_day12_part01,
-    benchmark_day12_part02
+    name = day12;
+    config = Criterion::default().measurement_time(Duration::from_secs(15));
+    targets = benchmark_day12_input, benchmark_day12_part01, benchmark_day12_part02
 );
 
 //-------------------------------------------------------------------------------------
