@@ -28,14 +28,9 @@ impl Ord for Packet {
             // When comparing two lists, compare item by item and return the first
             // result where the two items aren't equal. If one list has more items
             // than another and all the values up to the length of the shortest list
-            // are equal, then we compare the length of the lists.
-            (List(l1), List(l2)) => {
-                for (first, second) in l1.iter().zip(l2.iter()) {
-                    let result = first.cmp(second);
-                    let Ordering::Equal = result else { return result; };
-                }
-                l1.len().cmp(&l2.len())
-            }
+            // are equal, then we compare the length of the lists. Turns out, this 
+            // is exactly how comparing two vectors works _by default_! Woot!
+            (List(l1), List(l2)) => l1.cmp(l2),
         }
     }
 }
