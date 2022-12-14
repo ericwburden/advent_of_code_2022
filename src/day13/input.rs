@@ -76,8 +76,6 @@ mod test {
     use super::*;
     use std::fmt::{Display, Formatter, Result as FmtResult};
 
-    const EXAMPLE: &str = include_str!("../../input/13/example.txt");
-
     impl Display for Packet {
         fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
             match self {
