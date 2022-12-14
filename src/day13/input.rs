@@ -116,24 +116,4 @@ mod test {
             .collect();
         assert_eq!(INPUT, from_parsed);
     }
-
-    #[test]
-    fn part2() {
-        use Packet::*;
-        let input = parser::parse(INPUT).unwrap();
-        let divider1 = List(vec![List(vec![Integer(2)])]);
-        let divider2 = List(vec![List(vec![Integer(6)])]);
-
-        let mut all_packets = vec![divider1, divider2];
-        for packet_pair in input {
-            let PacketPair(first, second) = packet_pair;
-            all_packets.push(first);
-            all_packets.push(second);
-        }
-
-        all_packets.sort_unstable();
-        for (idx, packet) in all_packets.iter().enumerate() {
-            println!("{} - {packet}", idx + 1);
-        }
-    }
 }
