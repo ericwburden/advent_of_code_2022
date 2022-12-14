@@ -51,7 +51,6 @@ mod parser {
 }
 
 const INPUT: &str = include_str!("../../input/09/input.txt");
-const EXAMPLE: &str = include_str!("../../input/09/example.txt");
 
 pub fn read() -> Input {
     parser::parse(INPUT).unwrap()
