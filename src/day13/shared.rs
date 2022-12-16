@@ -28,7 +28,7 @@ impl Ord for Packet {
             // When comparing two lists, compare item by item and return the first
             // result where the two items aren't equal. If one list has more items
             // than another and all the values up to the length of the shortest list
-            // are equal, then we compare the length of the lists. Turns out, this 
+            // are equal, then we compare the length of the lists. Turns out, this
             // is exactly how comparing two vectors works _by default_! Woot!
             (List(l1), List(l2)) => l1.cmp(l2),
         }
