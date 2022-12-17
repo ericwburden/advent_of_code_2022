@@ -1,6 +1,6 @@
 use crate::day16::Input;
-use std::collections::HashMap;
 use itertools::Itertools;
+use std::collections::HashMap;
 
 /// Represents a line from the input, parsed to pull out the relevant values.
 /// Using this intermediate data structure because the _actual_ input gets
