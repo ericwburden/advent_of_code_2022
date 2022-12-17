@@ -1,16 +1,16 @@
-use crate::day15::{Input, Output, Sensor, Point};
+use crate::day15::{Input, Output, Point, Sensor};
 use itertools::Itertools;
 
-/// Solve Day 15, Part 1 
+/// Solve Day 15, Part 1
 pub fn solve(input: &Input) -> Output {
     let row = 2_000_000; // Our hard-coded row of interest
 
     // Identify a RowRange for each sensor indicated the furthest left and furthest
     // right point detected by each sensor. These RowRanges may overlap, though, so
-    // we need to 'condense' the ranges so we don't double-count any points. This 
+    // we need to 'condense' the ranges so we don't double-count any points. This
     // part depends on the input being sorted ahead of time, so that the RowRanges
     // come out sorted, so that all the RowRanges that can be condensed will be
-    // encountered one after another. If the input isn't sorted here, you'll get a 
+    // encountered one after another. If the input isn't sorted here, you'll get a
     // different (wrong) answer.
     let mut ranges: Vec<RowRange> = Vec::new();
     for range in input.iter().flat_map(|s| s.row_range_sensed(row)) {
@@ -19,7 +19,7 @@ pub fn solve(input: &Input) -> Output {
         if let Some(last_rng) = ranges.last_mut() {
             if last_rng.overlaps(&range) {
                 last_rng.merge(&range);
-            } 
+            }
             continue;
         }
         ranges.push(range);
@@ -29,7 +29,7 @@ pub fn solve(input: &Input) -> Output {
     // the limits of the `ranges`.
     let sensed_on_row = ranges.iter().map(|r| r.count_positions()).sum::<usize>();
 
-    // We'll need to subtract out the number of beacons on the row, since those 
+    // We'll need to subtract out the number of beacons on the row, since those
     // points definitely _can_ contain a beacon.
     let beacons_on_row = input
         .iter()
@@ -40,7 +40,6 @@ pub fn solve(input: &Input) -> Output {
     let definitely_not_beacons = sensed_on_row - beacons_on_row;
     (definitely_not_beacons as u32).into()
 }
-
 
 /// Represents a range of points on a given row of the scan. Includes the start and
 /// end points on that row.

@@ -67,7 +67,6 @@ mod parser {
         Finish, IResult,
     };
 
-
     /// Nom parser to skip everything that's not a number or minus sign
     fn till_number(s: &str) -> IResult<&str, &str> {
         take_till(|c: char| c.is_ascii_digit() || c == '-')(s)
@@ -120,13 +119,11 @@ mod test {
         assert_eq!(input.len(), 26);
 
         let first_found = *input.first().unwrap();
-        let first_expected =
-            Sensor::new(Point(3772068, 2853720), Point(4068389, 2345925));
+        let first_expected = Sensor::new(Point(3772068, 2853720), Point(4068389, 2345925));
         assert_eq!(first_found, first_expected);
 
         let last_found = *input.last().unwrap();
-        let last_expected =
-            Sensor::new(Point(2712265, 2155055), Point(2700909, 2519581));
+        let last_expected = Sensor::new(Point(2712265, 2155055), Point(2700909, 2519581));
         assert_eq!(last_found, last_expected);
     }
 }

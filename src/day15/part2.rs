@@ -1,4 +1,4 @@
-use crate::day15::{Input, Output, Sensor, Point};
+use crate::day15::{Input, Output, Point, Sensor};
 use itertools::Itertools;
 
 /// Solve Day 15, Part 2
@@ -10,14 +10,14 @@ use itertools::Itertools;
 /// one could contain the beacon is if the beacon were located in one of the four
 /// corner points of the allowed range. That would kind of suck, though, so it's
 /// probably not how it is. If it turns out to be the case, then we only have four
-/// possible answers to try, so it's a win-win. So, given that the beacon most 
+/// possible answers to try, so it's a win-win. So, given that the beacon most
 /// likely lies in a one-wide gap between sensor ranges, we can treat that gap like
 /// a line. The other assumption is that there's more than one one-wide gap.
 /// Otherwise, again, we'd have multiple unscanned spaces. That other gap would
 /// necessarily have a slope with opposite sign of the first gap, making an X with
-/// the center on the beacon. X marks the spot! So, if we can identify all the 
+/// the center on the beacon. X marks the spot! So, if we can identify all the
 /// one-wide gaps in the range of the sensors, we can identify all the places where
-/// these gap-lines intersect. If we can find one intersection that can't be 
+/// these gap-lines intersect. If we can find one intersection that can't be
 /// detected by any sensor, that's the one we want.
 pub fn solve(input: &Input) -> Output {
     // Identify all the diagonal gaps between sensor detection ranges that are only
@@ -69,7 +69,7 @@ impl Diagonal {
         // It's simple geometry! Which explains why it was so hard for me
         // to implement. Uses the formula for the two lines to calculate the
         // intersecting point, with some shortcuts because we know the slope
-        // will either be positive or negative one for both lines, and if 
+        // will either be positive or negative one for both lines, and if
         // the lines have the same slope, they're parallel and we can bail.
         use Diagonal::*;
         let (neg, pos) = match (self, other) {
@@ -97,8 +97,8 @@ impl Sensor {
     }
 
     /// Calculate the formula for the line that lies in the gap between two
-    /// Sensor detection ranges. The line will lie diagonally just outside 
-    /// the range of `self`. 
+    /// Sensor detection ranges. The line will lie diagonally just outside
+    /// the range of `self`.
     fn diagonal_between(&self, other: &Self) -> Diagonal {
         let Point(x1, y1) = self.location;
         let Point(x2, y2) = other.location;
