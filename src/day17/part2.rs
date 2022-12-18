@@ -6,45 +6,34 @@ use super::part1;
 
 pub fn solve(input: &Input) -> Output {
     let mut gas_jets = input.to_owned();
-    // let total_rocks = 1_000_000_000_000;
-    let total_rocks = 2022;
+    let total_rocks = 1_000_000_000_000;
     let mut rocks_added = 0;
-    // let mut seen = HashMap::new();
-    let mut chamber = Chamber::default();
-    let mut total_height = 0;
+    let mut seen = HashMap::with_capacity(2048);
+    let mut chamber = Chamber::with_capacity(2048);
+    let mut accumulated_height = 0;
     let mut rock_types = Shape::all().into_iter().cycle();
 
-    while rocks_added <= total_rocks {
+    while rocks_added < total_rocks {
         let rock = rock_types.next().unwrap();
         chamber.add_rock(&mut gas_jets, rock);
         rocks_added += 1;
-        // if chamber.height() < 8 {
-        //     continue;
-        // }
-
-        // let state = (chamber.skyline(), rock, gas_jets.idx);
-        // if let Some((prev_rocks_added, prev_height)) = seen.get(&state) {
-        //     let rocks_in_repeat: usize = rocks_added - prev_rocks_added;
-        //     let repeats: usize = (total_rocks - rocks_added) / rocks_in_repeat;
-        //     rocks_added += rocks_in_repeat * repeats;
-        //     total_height += repeats * (chamber.height() - prev_height);
-        //     seen.clear();
-        //     continue;
-        // }
-        // seen.insert(state, (rocks_added, chamber.height()));
-    }
-
-    (chamber.height() as u32 + total_height as u32).into()
-}
-
-use std::fmt::{Display, Formatter, Result as FmtResult};
-impl Display for Chamber {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        for byte in self.0.iter().rev() {
-            writeln!(f, "{:0>7b}", byte);
+        if chamber.height() < 8 {
+            continue;
         }
-        write!(f, "")
+
+        let state = (chamber.skyline(), rock, gas_jets.idx);
+        if let Some((prev_rocks_added, prev_height)) = seen.get(&state) {
+            let repeat_len: usize = rocks_added - prev_rocks_added;
+            let repeats: usize = (total_rocks - rocks_added) / repeat_len;
+            rocks_added += repeat_len * repeats;
+            accumulated_height += repeats * (chamber.height() - prev_height);
+            seen.clear();
+            continue;
+        }
+        seen.insert(state, (rocks_added, chamber.height()));
     }
+
+    (chamber.height() as u64 + accumulated_height as u64).into()
 }
 
 impl Chamber {

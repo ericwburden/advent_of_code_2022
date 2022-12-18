@@ -60,6 +60,10 @@ impl Shape {
 pub struct Chamber(pub Vec<u8>);
 
 impl Chamber {
+    pub fn with_capacity(n: usize) -> Self {
+        Self(Vec::with_capacity(n))
+    }
+
     pub fn height(&self) -> usize {
         self.0.len()
     }
@@ -111,40 +115,3 @@ impl Chamber {
     }
 }
 
-#[cfg(test)]
-mod test {
-    use super::*;
-    use std::fmt::{Display, Formatter, Result as FmtResult};
-
-    impl Display for Shape {
-        fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-            let bytes: Vec<_> = self.bytes().collect();
-            for byte in bytes.into_iter().rev() {
-                writeln!(f, "{:0>7b}", byte);
-            }
-            write!(f, "")
-        }
-    }
-
-    // impl Display for Chamber {
-    //     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-    //         for byte in self.0.iter().rev() {
-    //             writeln!(f, "{:0>7b}", byte);
-    //         }
-    //         write!(f, "")
-    //     }
-    // }
-
-    // #[test]
-    // fn playground() {
-    //     let mut gas_jets = super::super::input::read();
-    //     println!("{gas_jets:?}");
-    //     let total_rocks = 3;
-    //     let mut chamber = Chamber(Vec::with_capacity(total_rocks * 4));
-    //     for rock in Shape::all().iter().cycle().take(total_rocks) {
-    //         chamber.add_rock(&mut gas_jets, *rock);
-    //     }
-    //     println!("{chamber}");
-    //     println!("{}", chamber.height());
-    // }
-}

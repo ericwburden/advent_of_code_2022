@@ -28,7 +28,6 @@ mod tests {
     #[test]
     fn check_answer_two() {
         let result = run(Part::Two);
-        println!("{result}");
-        // 3155385382 is low
+        assert_eq!(result, 1532163742758u64);
     }
 }
