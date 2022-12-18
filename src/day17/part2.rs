@@ -1,5 +1,5 @@
-use crate::day17::{Input, Output};
 use super::part1::{Chamber, Rock};
+use crate::day17::{Input, Output};
 use std::collections::HashMap;
 
 /// Solve Day 17, Part 2
@@ -10,7 +10,7 @@ pub fn solve(input: &Input) -> Output {
     let mut rocks_added = 0; // Number of rocks added to the chamber
 
     // Keep up with the states we've seen of the chamber before. The state includes
-    // the top 8 levels of the chamber, the shape of the last rock added to the 
+    // the top 8 levels of the chamber, the shape of the last rock added to the
     // chamber, and the current internal index of the `gas_jets`.
     let mut seen = HashMap::with_capacity(2048);
 
@@ -31,8 +31,7 @@ pub fn solve(input: &Input) -> Output {
 
     // Until we've added all gajillion rocks...
     while rocks_added < total_rocks {
-
-        // Get the next rock, add it to the chamber, account for it, and if the 
+        // Get the next rock, add it to the chamber, account for it, and if the
         // chamber has fewer than 8 levels, do it again. We're checking the state
         // based on the top 8 levels, so no checking until we have at least 8 levels.
         let rock = rock_types.next().unwrap();
@@ -76,10 +75,9 @@ pub fn solve(input: &Input) -> Output {
 }
 
 impl Chamber {
-    /// Get the 'skyline' of the top of the chamber. Really, it's just a u64 with 
+    /// Get the 'skyline' of the top of the chamber. Really, it's just a u64 with
     /// bits representing the top 8 levels of the chamber.
     fn skyline(&self) -> Option<u64> {
-
         // If the chamber is less than 8 levels tall, we can't take a skyline
         if self.height() < 8 {
             return None;
