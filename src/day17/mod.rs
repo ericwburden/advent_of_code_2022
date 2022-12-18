@@ -3,8 +3,9 @@ pub mod part1;
 pub mod part2;
 
 use crate::{Output, Part};
+use input::{GasJetIter, Gust};
 
-pub type Input = u8;
+pub type Input = GasJetIter;
 
 pub fn run(part: Part) -> Output {
     let input = input::read();
@@ -21,12 +22,12 @@ mod tests {
     #[test]
     fn check_answer_one() {
         let result = run(Part::One);
-        println!("{result}");
+        assert_eq!(result, 3147);
     }
 
     #[test]
     fn check_answer_two() {
         let result = run(Part::Two);
-        println!("{result}");
+        assert_eq!(result, 1532163742758u64);
     }
 }
