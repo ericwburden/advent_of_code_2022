@@ -3,7 +3,7 @@ pub mod part1;
 pub mod part2;
 
 use crate::{Output, Part};
-use input::{GasJetIter, Push};
+use input::{GasJetIter, Gust};
 
 pub type Input = GasJetIter;
 
