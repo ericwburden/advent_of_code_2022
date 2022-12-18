@@ -1,4 +1,4 @@
-use crate::day17::{GasJetIter, Input, Output, Gust};
+use crate::day17::{GasJetIter, Gust, Input, Output};
 
 /// Solve Day 17, Part 1
 pub fn solve(input: &Input) -> Output {
@@ -24,7 +24,7 @@ pub fn solve(input: &Input) -> Output {
 // checking much easier, as well as adding rocks to the chamber. It does, however
 // make _reading_ the code a bit more difficult. These are the 32-bit integers
 // that represent the column just to the left of the left wall and the column
-// just to the right of the right wall. If any part of our rock overlaps one of 
+// just to the right of the right wall. If any part of our rock overlaps one of
 // those spaces and the wind tries to push it in the corresponding direction,
 // it won't move over.
 const LEFT_WALL: u32 = 0x40404040;
@@ -36,7 +36,7 @@ pub struct Rock(u32);
 
 impl Rock {
     /// Produce a list of all five rock shapes, in order. This is what they look
-    /// like in octal. Printed out in binary one byte at a time, with each byte 
+    /// like in octal. Printed out in binary one byte at a time, with each byte
     /// on a new line, they look like this (using . instead of 0 to make it easier
     /// to see):
     ///
@@ -85,7 +85,7 @@ impl Rock {
         }
     }
 
-    /// Check to see if this rock collides with another object. 
+    /// Check to see if this rock collides with another object.
     fn collides(&self, other: u32) -> bool {
         self.0 & other > 0
     }
@@ -123,7 +123,7 @@ impl Chamber {
         }
 
         // Starting at `level`, take up to four bytes from the chamber, reverse
-        // the production (so that the chunk is right-side up) of bytes, then 
+        // the production (so that the chunk is right-side up) of bytes, then
         // convert the four bytes into a single u32 by shifting existing bits
         // left and adding each new byte to the first 8 bits after the shift.
         self.0
@@ -137,7 +137,6 @@ impl Chamber {
     /// Add a rock to the top of the chamber and allow it to fall until it
     /// comes to rest on another rock or the floor.
     pub fn add_rock(&mut self, gas_jets: &mut GasJetIter, mut rock: Rock) {
-
         // Start the rock out three levels above the top of chamber, which is
         // the top level with any rock parts.
         let mut level = self.height() + 3;
@@ -169,10 +168,9 @@ impl Chamber {
 
             // If we reached the floor or would collide with another rock...
             if level == 0 || collision {
-
                 // Add the rock to the chamber, layer by layer. Where there's a
                 // chamber level already there for the layer of rock we're adding,
-                // just add the layer of rock to the level. Otherwise, push the 
+                // just add the layer of rock to the level. Otherwise, push the
                 // layer to the top of the chamber's bytes.
                 for byte in rock.bytes() {
                     if level < self.height() {
@@ -191,4 +189,3 @@ impl Chamber {
         }
     }
 }
-

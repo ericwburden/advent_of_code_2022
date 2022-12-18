@@ -73,7 +73,7 @@ mod parser {
         map(pushes, GasJetIter::from)(s)
     }
 
-    /// Main parsing function, attempts to parse the input into a GasJetIter and 
+    /// Main parsing function, attempts to parse the input into a GasJetIter and
     /// return it.
     pub fn parse(s: &str) -> Result<GasJetIter> {
         let (_, result) = gas_jet_iter(s).finish().map_err(|e| anyhow!("{e}"))?;
