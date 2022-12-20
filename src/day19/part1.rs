@@ -65,12 +65,17 @@ impl Factory {
             return None;
         }
 
-        // if zip(cost, self.stockpile)
-        //     .filter(|(lhs, _)| *lhs > 0)
-        //     .all(|(lhs, rhs)| lhs < rhs)
-        // {
-        //     return None;
-        // }
+        // If there's only one turn left, then skip it. This factory won't
+        // produce anything else.
+        if self.remaining == 1 { return None; }
+
+        let last_turn_resources = self.stockpile.saturating_sub(self.bots);
+        if zip(cost, last_turn_resources)
+            .filter(|(lhs, _)| *lhs > 0)
+            .all(|(lhs, rhs)| lhs < rhs)
+        {
+            return None;
+        }
 
         let mut new_state = *self;
         while new_state.remaining > 0 && self.bots == new_state.bots {

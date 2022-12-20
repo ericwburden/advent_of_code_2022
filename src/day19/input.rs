@@ -1,5 +1,5 @@
 use crate::day19::Input;
-use std::ops::{Add, AddAssign, Index, IndexMut, Mul, SubAssign};
+use std::ops::{Add, AddAssign, Index, IndexMut, Mul, Sub, SubAssign};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Resource {
@@ -105,6 +105,14 @@ impl ResourceCountArray {
             .enumerate()
             .map(|(p, v)| v.pow(p as u32))
             .sum::<u32>()
+    }
+
+    pub fn saturating_sub(&self, other: ResourceCountArray) -> ResourceCountArray {
+        let mut difference: ResourceCountArray = Default::default();
+        for (idx, (lhs, rhs)) in self.into_iter().zip(other.into_iter()).enumerate() {
+            difference[idx] = lhs.saturating_sub(rhs);
+        }
+        difference
     }
 }
 
