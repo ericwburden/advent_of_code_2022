@@ -470,10 +470,9 @@ pub fn benchmark_day19_part02(c: &mut Criterion) {
 }
 
 criterion_group!(
-    day19,
-    benchmark_day19_input,
-    benchmark_day19_part01,
-    benchmark_day19_part02
+    name = day19;
+    config = Criterion::default().measurement_time(Duration::from_secs(10));
+    targets = benchmark_day19_input, benchmark_day19_part01, benchmark_day19_part02
 );
 
 //-------------------------------------------------------------------------------------

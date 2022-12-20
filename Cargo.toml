@@ -19,6 +19,7 @@ clap = { version = "4.0.22", features = ["derive"] }
 criterion = "0.4.0"
 itertools = "0.10.5"
 nom = "7.1.1"
+rayon = "1.6.1"
 
 [[bench]]
 name = "all_days"
