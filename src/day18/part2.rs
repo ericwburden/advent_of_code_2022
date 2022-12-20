@@ -1,8 +1,8 @@
-use crate::day18::{Input, Output};
-use super::part1::Offset;
 use super::input::Cube;
-use std::ops::RangeInclusive;
+use super::part1::Offset;
+use crate::day18::{Input, Output};
 use std::collections::HashSet;
+use std::ops::RangeInclusive;
 
 /// Solve Day 18, Part 2
 pub fn solve(input: &Input) -> Output {
@@ -28,7 +28,6 @@ pub fn solve(input: &Input) -> Output {
 
     // So long as there are still Cubes outside the lava blob to check...
     while let Some(cube) = stack.pop() {
-
         // If the cube we're on has already been explored or it falls outside
         // the bounding box, skip it.
         if seen.contains(&cube) || !bounds.contains(&cube) {
@@ -44,7 +43,7 @@ pub fn solve(input: &Input) -> Output {
 
         seen.insert(cube);
 
-        // For each cube that shares a face with the current Cube, if we haven't 
+        // For each cube that shares a face with the current Cube, if we haven't
         // explored it already, add it to the stack for later exploration.
         for neighbor in cube.neighbors() {
             if seen.contains(&neighbor) {
@@ -59,7 +58,11 @@ pub fn solve(input: &Input) -> Output {
 
 /// Represents the 3D range that contains all the air Cubes we want to explore,
 /// encapsulating the lava Cubes.
-struct Bounds(RangeInclusive<i32>, RangeInclusive<i32>, RangeInclusive<i32>);
+struct Bounds(
+    RangeInclusive<i32>,
+    RangeInclusive<i32>,
+    RangeInclusive<i32>,
+);
 
 /// This trait provides a convenient way to get the bounding box of
 /// a HashSet of Cubes
@@ -99,8 +102,7 @@ impl Bounds {
     /// Indicates whether a Cube lies within the Bounds
     fn contains(&self, cube: &Cube) -> bool {
         let (x, y, z) = cube.inner();
-        let Bounds( x_range, y_range, z_range ) = self;
+        let Bounds(x_range, y_range, z_range) = self;
         x_range.contains(&x) && y_range.contains(&y) && z_range.contains(&z)
     }
 }
-

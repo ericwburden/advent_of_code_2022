@@ -31,7 +31,7 @@ mod parser {
     use nom::{
         branch::alt,
         bytes::complete::tag,
-        character::complete::{newline, i32},
+        character::complete::{i32, newline},
         combinator::map,
         multi::separated_list0,
         sequence::{terminated, tuple},
