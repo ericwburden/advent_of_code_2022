@@ -6,6 +6,11 @@ use std::iter::zip;
 use std::ops::{Index, IndexMut};
 use Resource::*;
 
+/// Solve Day 19, Part 1
+///
+/// I finally found a good an legitimate use for `rayon`! I probably could have used
+/// parallel processing on Day 16, too. May try that later. Here, though, we can
+/// process each blueprint in parallel, really helping with speed.
 pub fn solve(input: &Input) -> Output {
     input
         .par_iter()
@@ -15,6 +20,10 @@ pub fn solve(input: &Input) -> Output {
         .into()
 }
 
+/// It's a Factory that produces Factories! Represents each state of resource
+/// production and includes the original blueprint, the number of turns remaining,
+/// the current bot count, the current stockpile of resources, and the total number
+/// of each type of resource produced.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Factory {
     blueprint: Blueprint,
@@ -22,9 +31,12 @@ pub struct Factory {
     bots: ResourceCountArray,
     stockpile: ResourceCountArray,
     produced: ResourceCountArray,
-    max_costs: ResourceCountArray,
 }
 
+/// Sorting for Factory, so that the state closest to completion floats to
+/// the top of the Binary Heap we'll use for the graph search algorithm. "Greater"
+/// values for Factory are those where the most geodes can possibly be produced
+/// using the best-guess estimate.
 impl Ord for Factory {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         let self_estimate = self.best_estimate(Geode);
@@ -40,21 +52,21 @@ impl PartialOrd for Factory {
 }
 
 impl Factory {
+    /// Create a new Factory!
     pub fn new(blueprint: Blueprint, time: u32) -> Self {
-        let max_costs = blueprint
-            .recipes
-            .into_iter()
-            .fold(Default::default(), |acc, x| acc + x.cost);
         Factory {
             blueprint,
             remaining: time,
             bots: ResourceCountArray([1, 0, 0, 0]),
             stockpile: Default::default(),
             produced: Default::default(),
-            max_costs,
         }
     }
 
+    /// Try to produce a bot from the given recipe. Attempts to fast-forward the
+    /// state until the given bot is produced, if it can be. There are a few
+    /// different guard clauses that aim to prevent creating new states that won't
+    /// lead to the optimal solution.
     fn produce_recipe(&self, recipe: Recipe) -> Option<Factory> {
         let Recipe { bot, cost } = recipe;
 
@@ -67,8 +79,13 @@ impl Factory {
 
         // If there's only one turn left, then skip it. This factory won't
         // produce anything else.
-        if self.remaining == 1 { return None; }
+        if self.remaining == 1 {
+            return None;
+        }
 
+        // If this factory could have produced the current recipe in its last
+        // incarnation, then it should have produced that bot back then. Too
+        // late, now!
         let last_turn_resources = self.stockpile.saturating_sub(self.bots);
         if zip(cost, last_turn_resources)
             .filter(|(lhs, _)| *lhs > 0)
@@ -77,6 +94,10 @@ impl Factory {
             return None;
         }
 
+        /// If we're actually going to produce this bot, we need to advance the
+        /// current Factory state minute-by-minute until we've gathered enough
+        /// resources to produce the bot. Then we pay the price, produce the bot,
+        /// and return the state.
         let mut new_state = *self;
         while new_state.remaining > 0 && self.bots == new_state.bots {
             let available = new_state.stockpile;
@@ -93,6 +114,10 @@ impl Factory {
         Some(new_state)
     }
 
+    /// Identify all the next states that can be reached from the current Factory.
+    /// Tries to produce one of each bot and includes a "wait" state where the
+    /// Factory just lets time run out. This is for cases when not enough resources
+    /// will be generated to produce any more bots before time runs out.
     fn next_states(&self) -> impl Iterator<Item = Factory> + '_ {
         let mut wait_state = *self;
         wait_state.stockpile += self.bots * self.remaining;
@@ -108,6 +133,8 @@ impl Factory {
             .chain(wait_state_iter)
     }
 
+    /// Identify the most possible resources of a given type that could be
+    /// produced under ideal circumstances.
     fn best_estimate(&self, resource: Resource) -> u32 {
         // Assume that we can make one new bot per minute for
         // the remaining time. In that perfect scenario, how many
@@ -120,38 +147,62 @@ impl Factory {
         new_resources + self.produced[resource]
     }
 
+    /// This is our unique identifier for a given Factory. It's the simplest
+    /// value that identifies a Factory uniquely _enough_ to find the right
+    /// solution.
     fn key(&self) -> ResourceCountArray {
         self.bots + self.produced
     }
 
+    /// Performs a modified A* search through the possible Factory states,
+    /// seeking a state that produces the most possible geodes.
     pub fn geodes_produced(&self) -> u32 {
         let mut heap = BinaryHeap::from([*self]);
         let mut seen = HashSet::new();
-        let mut most_geodes = 0;
+        let mut most_geodes = 0; // Used for optimization
 
+        // So long as the heap still has items on it...
         while let Some(state) = heap.pop() {
+            // If we reached a state where time runs out, we've identified
+            // the state producing the most geodes, assuming we've implemented
+            // the ordering of Factories correctly.
             if state.remaining == 0 {
                 return state.stockpile[Geode];
             }
+
+            // If we've seen this state already, skip it.
             if seen.contains(&state.key()) {
                 continue;
             }
+
+            // Otherwise, mark it as seen. Update the most geodes produced
+            // by any state seen so far.
             seen.insert(state.key());
             most_geodes = most_geodes.max(state.produced[Geode]);
 
             for next_state in state.next_states() {
+                // If we've seen this `next_state` before, skip it.
                 if seen.contains(&next_state.key()) {
                     continue;
                 }
+
+                // If the best possible geode production for this state is still
+                // less than the most geodes we've actually seen in a state so
+                // far, skip it. The best estimate is an overestimate by design.
                 if next_state.best_estimate(Geode) < most_geodes {
                     continue;
                 }
+
+                // Add this state to the heap to be checked.
                 heap.push(next_state);
             }
         }
+
+        // This should never happen
         unreachable!()
     }
 
+    /// Calcualate the quality level of this Factory
     fn quality_level(&self) -> u32 {
         self.blueprint.id * self.geodes_produced()
     }
