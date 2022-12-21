@@ -14,7 +14,7 @@ pub fn solve(input: &Input) -> Output {
 
 /// Really just a convenient struct for bundling together the three vectors
 /// we'll use to solve this puzzle. Who needs an actual linked list when you
-/// can just simulate one! The three vectors here will serve as a 
+/// can just simulate one! The three vectors here will serve as a
 /// pseudo-doubly-linked-list, with the values in `nodes`, the pointers to
 /// next values in `forward_links`, and the pointers ot previous values
 /// in `backward_links`.
@@ -41,19 +41,29 @@ impl From<Vec<i64>> for MixingDecryptor {
             .chain(0..(nodes.len() - 1))
             .collect();
 
-        MixingDecryptor { nodes, forward_links, backward_links }
+        MixingDecryptor {
+            nodes,
+            forward_links,
+            backward_links,
+        }
     }
 }
 
 impl MixingDecryptor {
     /// Mix up that list!
     pub fn mix(&mut self) {
-        let Self { nodes, forward_links, backward_links } = self;
+        let Self {
+            nodes,
+            forward_links,
+            backward_links,
+        } = self;
         for (moved_node_idx, moved_node) in nodes.iter().copied().enumerate() {
             // If the value of the node is zero, don't move anything.
-            if moved_node == 0 { continue; }
+            if moved_node == 0 {
+                continue;
+            }
 
-            // We calculate the number of skips such that we never 
+            // We calculate the number of skips such that we never
             // wrap fully around the list of nodes. We do this by taking
             // the absolute value of the node mod the length of the list
             // minus one. Why minus one? Because we don't count the node
@@ -65,7 +75,7 @@ impl MixingDecryptor {
             // Follow forward links for positive numbers and backward links for
             // negative numbers.
             let mut displaced_node_idx = moved_node_idx;
-            for _ in (0..skips ) {
+            for _ in (0..skips) {
                 if moved_node > 0 {
                     displaced_node_idx = forward_links[displaced_node_idx];
                 }

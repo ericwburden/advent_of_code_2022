@@ -1,10 +1,10 @@
-use crate::day20::{Input, Output};
 use super::part1::MixingDecryptor;
+use crate::day20::{Input, Output};
 
 /// Solve Day 20, Part 2
 ///
 /// No real changes here, other than multiplying each value by some hefty
-/// prime-looking number and mixing the list ten times. Just call me 
+/// prime-looking number and mixing the list ten times. Just call me
 /// Sir Mix-A-Lot.
 pub fn solve(input: &Input) -> Output {
     let mod_input: Vec<_> = input.iter().map(|x| x * 811589153).collect();
