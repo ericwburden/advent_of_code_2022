@@ -3,8 +3,10 @@ pub mod part1;
 pub mod part2;
 
 use crate::{Output, Part};
+use input::Environment;
+use std::collections::HashMap;
 
-pub type Input = u8;
+pub type Input = Environment;
 
 pub fn run(part: Part) -> Output {
     let input = input::read();
