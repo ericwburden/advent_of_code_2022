@@ -19,7 +19,7 @@ pub fn solve(input: &Input) -> Output {
 
     // The PartialEval trait attempts to evaluate the calling expression and
     // updates each variable in the environment that can be evalutated along
-    // the way. From this point forward, every variable in the environment 
+    // the way. From this point forward, every variable in the environment
     // that doesn't depend on "humn" will be a raw value instead of an expression
     // containing references.
     let left_val = left.partial_eval(&mut env);
@@ -39,8 +39,8 @@ pub fn solve(input: &Input) -> Output {
     };
 
     // Since we know that both values checked by the "root" monkey must be equal,
-    // then we know enough to start solving each expression from `next_op` all 
-    // the way to the value of "humn". For example, say we had the following 
+    // then we know enough to start solving each expression from `next_op` all
+    // the way to the value of "humn". For example, say we had the following
     // set of relationships:
     //
     // - root =  5 == abcd (5)
@@ -52,7 +52,7 @@ pub fn solve(input: &Input) -> Output {
     // formulae and solving by rearrangement one formula at a time until we
     // find the value of "humn".
     while let Some(expr) = next_op {
-        // Rearrange the expressions based on the value we're carrying forward and 
+        // Rearrange the expressions based on the value we're carrying forward and
         // the type of operation being performed. There's a lot of "unreachable"
         // points along the way that are possible because we know that every
         // variable that doesn't depend on "humn" has already been fully evaluated.
@@ -92,7 +92,7 @@ impl Environment {
 }
 
 /// This trait is used to evaluate Expressions in an Environment, updating
-/// the Environment whenever a variable is evaluated. Going forward, the 
+/// the Environment whenever a variable is evaluated. Going forward, the
 /// Environment will have variables as fully evaluated as possible upon
 /// which the expression that calls PartialEval depends.
 trait PartialEval {

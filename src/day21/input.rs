@@ -2,7 +2,7 @@ use crate::day21::Input;
 use anyhow::{bail, Error};
 use std::collections::HashMap;
 
-/// Represents the names of each monkey. I originally wanted to use 
+/// Represents the names of each monkey. I originally wanted to use
 /// string references as the monkey labels, but that causes borrow
 /// checker issues with mutating the Environment (defined below),
 /// so I'm using a small, cheap array of characters instead.
@@ -43,7 +43,7 @@ impl TryFrom<&str> for Value {
     }
 }
 
-/// Represents one of the mathematical expressions being evaluated by a 
+/// Represents one of the mathematical expressions being evaluated by a
 /// monkey. Every monkey is evaluating an expression, even if it's just
 /// to report a value.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
