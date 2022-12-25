@@ -16,7 +16,7 @@ pub fn solve(input: &Input) -> Output {
 
     // Follow each direction
     directions
-        .into_iter()
+        .iter()
         .for_each(|direction| walker.follow(&board, *direction));
 
     // Let the walker calculate its own score and return it
