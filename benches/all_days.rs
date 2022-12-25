@@ -568,10 +568,9 @@ pub fn benchmark_day23_part02(c: &mut Criterion) {
 }
 
 criterion_group!(
-    day23,
-    benchmark_day23_input,
-    benchmark_day23_part01,
-    benchmark_day23_part02
+    name = day23;
+    config = Criterion::default().measurement_time(Duration::from_secs(60));
+    targets = benchmark_day23_input, benchmark_day23_part01, benchmark_day23_part02
 );
 
 //-------------------------------------------------------------------------------------
