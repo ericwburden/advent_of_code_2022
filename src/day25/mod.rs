@@ -2,8 +2,9 @@ pub mod input;
 pub mod part1;
 
 use crate::{Output, Part};
+use input::Snafu;
 
-pub type Input = u8;
+pub type Input = Vec<Snafu>;
 
 pub fn run(part: Part) -> Output {
     let input = input::read();
@@ -20,6 +21,6 @@ mod tests {
     #[test]
     fn check_answer_one() {
         let result = run(Part::One);
-        println!("{result}");
+        assert_eq!(result, "2-=102--02--=1-12=22");
     }
 }
