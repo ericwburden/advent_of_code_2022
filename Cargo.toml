@@ -16,7 +16,7 @@ path = "src/bin.rs"
 [dependencies]
 anyhow = "1.0.66"
 clap = { version = "4.0.22", features = ["derive"] }
-criterion = "0.4.0"
+criterion = { version = "0.4.0", features = ["html_reports"] }
 itertools = "0.10.5"
 nom = "7.1.1"
 rayon = "1.6.1"

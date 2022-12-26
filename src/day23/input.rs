@@ -22,8 +22,8 @@ impl Position {
     }
 }
 
-/// Represents the cardinal and secondary directions that matter for 
-/// today's puzzle. 
+/// Represents the cardinal and secondary directions that matter for
+/// today's puzzle.
 #[derive(Debug, Clone, Copy)]
 pub enum Direction {
     North,
@@ -52,7 +52,7 @@ impl Surroundings {
     }
 }
 
-/// Represents an indicator for which direction the elf should look when 
+/// Represents an indicator for which direction the elf should look when
 /// determining which direction to move.
 #[derive(Debug, Clone, Copy)]
 pub enum Rule {
@@ -99,7 +99,9 @@ impl<'a> From<&'a str> for Grove {
         let mut elves = HashMap::new();
         for (row_idx, row) in input.lines().enumerate() {
             for (col_idx, glyph) in row.chars().enumerate() {
-                if glyph == '.' { continue; }
+                if glyph == '.' {
+                    continue;
+                }
                 let position = Position(col_idx as isize, row_idx as isize);
                 let elf_id = elves.len();
                 elves.insert(elf_id, position);

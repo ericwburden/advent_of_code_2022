@@ -2,9 +2,9 @@ pub mod input;
 pub mod part1;
 pub mod part2;
 
-use std::collections::HashMap;
 use crate::{Output, Part};
 use input::Valley;
+use std::collections::HashMap;
 
 pub type Input = Vec<Valley>;
 
