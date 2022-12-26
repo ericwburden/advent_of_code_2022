@@ -1,5 +1,5 @@
-use crate::day25::{Input, Output};
 use super::input::Snafu;
+use crate::day25::{Input, Output};
 
 pub fn solve(input: &Input) -> Output {
     let fuel_cost: i128 = input.iter().cloned().map(i128::from).sum();

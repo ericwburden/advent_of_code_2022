@@ -8,7 +8,9 @@ pub fn solve(input: &Input) -> Output {
     let mut grove = input.clone();
 
     // Advance to the next state ten times
-    (0..10).for_each(|_| { grove.move_elves(); });
+    (0..10).for_each(|_| {
+        grove.move_elves();
+    });
 
     // Count the empty spaces and return the count
     grove.count_empty_spaces().into()
@@ -44,12 +46,16 @@ impl Grove {
         let cr = true; // Used for the center space
 
         // If there are no nearby elves, return None
-        if !(nw || no || ne || ea || se || so || sw || we) { 
+        if !(nw || no || ne || ea || se || so || sw || we) {
             return None;
         }
 
         // Otherwise, return the Surroundings
-        Some(Surroundings::new([[nw, no, ne], [we, cr, ea], [sw, so, se]]))
+        Some(Surroundings::new([
+            [nw, no, ne],
+            [we, cr, ea],
+            [sw, so, se],
+        ]))
     }
 
     /// Gather all the proposals for moving from all the elves at the current
@@ -66,11 +72,14 @@ impl Grove {
             let Some(proposed) = self.rules.try_propose(position, &surroundings) else { continue; };
 
             // ..and try to add that proposal to the proposal mapping. If
-            // this is the first elf proposing to move to the `proposed` 
-            // position, then add it as a Move proposal. If another elf 
+            // this is the first elf proposing to move to the `proposed`
+            // position, then add it as a Move proposal. If another elf
             // has already proposed to move to that position, block them
             // both.
-            moves.entry(proposed).and_modify(|e| *e = Proposal::Blocked).or_insert(Proposal::Move(*elf));
+            moves
+                .entry(proposed)
+                .and_modify(|e| *e = Proposal::Blocked)
+                .or_insert(Proposal::Move(*elf));
         }
         moves
     }
@@ -86,7 +95,6 @@ impl Grove {
 
         // For each position with a proposal...
         for (position, proposal) in proposed_state.iter() {
-
             // If the proposal hasn't been blocked, then...
             let Proposal::Move(elf) = proposal else { continue; };
 
@@ -98,7 +106,7 @@ impl Grove {
             // Set the indicator for any elves moved to `true`
             any_moved = true;
         }
-        
+
         // Rotate the rules order
         self.rules.rotate_left();
 
@@ -107,7 +115,7 @@ impl Grove {
     }
 
     /// Check the current arrangement of elves in the Grove and return two
-    /// positions marking the bounds of the rectangle containing all the 
+    /// positions marking the bounds of the rectangle containing all the
     /// elves. The first Position is the top-left corner and the second
     /// Position is the bottom right corner.
     fn bounds(&self) -> (Position, Position) {
@@ -122,7 +130,7 @@ impl Grove {
             min_y = min_y.min(ypos);
             max_y = max_y.max(ypos);
         }
-        
+
         (Position::new(min_x, min_y), Position::new(max_x, max_y))
     }
 
@@ -137,7 +145,9 @@ impl Grove {
         for xpos in min_x..=max_x {
             for ypos in min_y..=max_y {
                 let position = Position::new(xpos, ypos);
-                if self.occupied.contains(&position) { continue; }
+                if self.occupied.contains(&position) {
+                    continue;
+                }
                 empty_spaces += 1;
             }
         }
@@ -210,7 +220,7 @@ impl TryPropose for Rule {
 
 impl TryPropose for Rules {
     /// Try to get the elf to propose to move by checking each Rule in order.
-    /// If the elf can't move for any of the four rules, then return None. 
+    /// If the elf can't move for any of the four rules, then return None.
     /// Otherwise, return the first Position that the elf should propose to
     /// move to.
     fn try_propose(&self, position: &Position, surroundings: &Surroundings) -> Option<Position> {
@@ -254,11 +264,14 @@ mod test {
                 write!(f, "| ")?;
                 for xpos in min_x..=max_x {
                     let pos = Position::new(xpos, ypos);
-                    let glyph = if self.occupied.contains(&pos) { '#' } else { '.' };
+                    let glyph = if self.occupied.contains(&pos) {
+                        '#'
+                    } else {
+                        '.'
+                    };
                     write!(f, "{glyph}")?;
                 }
                 writeln!(f, " |")?;
-
             }
             write!(f, "")
         }
