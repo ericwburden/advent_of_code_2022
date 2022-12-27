@@ -18,6 +18,11 @@ pub fn run(part: Part) -> Output {
     }
 }
 
+pub fn run_both() -> (Output, Output) {
+    let input = input::read();
+    (part1::solve(&input), part2::solve(&input))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

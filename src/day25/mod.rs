@@ -14,6 +14,11 @@ pub fn run(part: Part) -> Output {
     }
 }
 
+pub fn run_both() -> (Output, Output) {
+    let input = input::read();
+    (part1::solve(&input), Output::String(String::from("Nothing to see here..")))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
