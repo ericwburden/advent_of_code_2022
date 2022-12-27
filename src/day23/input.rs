@@ -92,8 +92,8 @@ pub enum Proposal {
 
 /// Represents the entire program state, the Grove that the elves are spreading
 /// out in. Contains a mapping from elf ID to their current position, a set of
-/// all the currently occupied positions, and the rules in the order they should
-/// be considered.
+/// all the currently occupied positions, a mapping of positions to proposed moves,
+/// and the rules for proposing moves in the order they should be considered.
 #[derive(Debug, Clone)]
 pub struct Grove {
     pub elves: HashMap<usize, Position>,
