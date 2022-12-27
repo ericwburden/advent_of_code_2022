@@ -80,6 +80,16 @@ impl Rules {
     }
 }
 
+/// Represents the current status of a proposed move by an elf. When only one
+/// elf has propsed to move to a particular Position, use the Move variant. If
+/// two or more elves propose to move the the same space, use the Blocked
+/// variant.
+#[derive(Debug, Clone, Copy)]
+pub enum Proposal {
+    Move(usize),
+    Blocked,
+}
+
 /// Represents the entire program state, the Grove that the elves are spreading
 /// out in. Contains a mapping from elf ID to their current position, a set of
 /// all the currently occupied positions, and the rules in the order they should
@@ -88,6 +98,7 @@ impl Rules {
 pub struct Grove {
     pub elves: HashMap<usize, Position>,
     pub occupied: HashSet<Position>,
+    pub proposed: HashMap<Position, Proposal>,
     pub rules: Rules,
 }
 
@@ -115,10 +126,14 @@ impl<'a> From<&'a str> for Grove {
         // The list of four rules in the initial order
         let rules = Rules([Rule::North, Rule::South, Rule::West, Rule::East]);
 
+        // Maintaining a single list of proposed moves on the Grove
+        let proposed = HashMap::with_capacity(occupied.len());
+
         Grove {
             elves,
             occupied,
             rules,
+            proposed,
         }
     }
 }
