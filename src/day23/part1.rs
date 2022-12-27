@@ -1,4 +1,4 @@
-use super::input::{Direction, Grove, Position, Rule, Rules, Surroundings};
+use super::input::{Direction, Grove, Position, Rule, Rules, Surroundings, Proposal};
 use crate::day23::{Input, Output};
 use std::collections::HashMap;
 
@@ -14,16 +14,6 @@ pub fn solve(input: &Input) -> Output {
 
     // Count the empty spaces and return the count
     grove.count_empty_spaces().into()
-}
-
-/// Represents the current status of a proposed move by an elf. When only one
-/// elf has propsed to move to a particular Position, use the Move variant. If
-/// two or more elves propose to move the the same space, use the Blocked
-/// variant.
-#[derive(Debug, Clone, Copy)]
-enum Proposal {
-    Move(usize),
-    Blocked,
 }
 
 impl Grove {
@@ -60,9 +50,7 @@ impl Grove {
 
     /// Gather all the proposals for moving from all the elves at the current
     /// state. Return a map of Positions and the Proposed action for each.
-    fn propose_state(&self) -> HashMap<Position, Proposal> {
-        let mut moves = HashMap::with_capacity(self.elves.len());
-
+    fn make_proposals(&mut self) {
         // For each elf entry in the mapping of elf => position...
         for (elf, position) in self.elves.iter() {
             // If there are any nearby elves...
@@ -76,25 +64,24 @@ impl Grove {
             // position, then add it as a Move proposal. If another elf
             // has already proposed to move to that position, block them
             // both.
-            moves
+            self.proposed
                 .entry(proposed)
                 .and_modify(|e| *e = Proposal::Blocked)
                 .or_insert(Proposal::Move(*elf));
         }
-        moves
     }
 
     /// Simulate the elves proposing to move to their new positions then move
     /// the elves where you can. Rotate the rules so that they'll be in the
     /// correct order for the next state change.
     pub fn move_elves(&mut self) -> bool {
-        let proposed_state = self.propose_state();
+        self.make_proposals();
 
         // We'll identify and return whether any elves moved during this state change.
         let mut any_moved = false;
 
         // For each position with a proposal...
-        for (position, proposal) in proposed_state.iter() {
+        for (position, proposal) in self.proposed.iter() {
             // If the proposal hasn't been blocked, then...
             let Proposal::Move(elf) = proposal else { continue; };
 
@@ -109,6 +96,9 @@ impl Grove {
 
         // Rotate the rules order
         self.rules.rotate_left();
+
+        // Clear the proposals
+        self.proposed.clear();
 
         // Return the indicator
         any_moved
