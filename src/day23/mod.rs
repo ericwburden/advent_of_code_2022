@@ -1,11 +1,12 @@
+pub mod grid;
 pub mod input;
 pub mod part1;
 pub mod part2;
 
 use crate::{Output, Part};
-use input::Grove;
+use grid::Grid;
 
-pub type Input = Grove;
+pub type Input = Grid<3, 192>;
 
 pub fn run(part: Part) -> Output {
     let input = input::read();
