@@ -7,19 +7,18 @@ use crate::{Output, Part};
 use input::Signal;
 use shared::SequenceDetector;
 
-pub type Input = Vec<Signal>;
+pub type Input = Box<dyn Iterator<Item = Signal>>;
 
 pub fn run(part: Part) -> Output {
     let input = input::read();
     match part {
-        Part::One => part1::solve(&input),
-        Part::Two => part2::solve(&input),
+        Part::One => part1::solve(input::read()),
+        Part::Two => part2::solve(input::read()),
     }
 }
 
 pub fn run_both() -> (Output, Output) {
-    let input = input::read();
-    (part1::solve(&input), part2::solve(&input))
+    (part1::solve(input::read()), part2::solve(input::read()))
 }
 
 #[cfg(test)]

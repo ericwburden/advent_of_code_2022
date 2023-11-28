@@ -1,6 +1,6 @@
+use super::grid::{Grid, GridBuilder, Rules};
 use crate::day23::{Input, Output};
 use std::collections::HashMap;
-use super::grid::{Grid, Rules, GridBuilder};
 
 /// Solve Day 23, Part 1
 pub fn solve(input: &Input) -> Output {
@@ -23,4 +23,3 @@ pub fn solve(input: &Input) -> Output {
     // Count and return the number of empty spaces
     state.count_empty_spaces().into()
 }
-

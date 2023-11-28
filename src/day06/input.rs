@@ -7,7 +7,7 @@ const INPUT: &str = include_str!("../../input/06/input.txt");
 /// Read in the input by converting each character to a `Signal` and returning
 /// the list.
 pub fn read() -> Input {
-    INPUT.trim().chars().flat_map(Signal::try_from).collect()
+    Box::new(INPUT.chars().flat_map(Signal::try_from))
 }
 
 /// Represents a single signal received on our device. Each character from the
@@ -43,7 +43,7 @@ mod test {
 
     #[test]
     fn name() {
-        let input = read();
+        let input: Vec<_> = read().collect();
         assert_eq!(input.len(), 4095);
 
         let first_signal = *input.first().unwrap();

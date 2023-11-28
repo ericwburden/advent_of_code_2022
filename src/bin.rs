@@ -1,8 +1,8 @@
 // Declare modules for each day here
 use aoc2022lib::*;
 use clap::Parser;
-use std::time::{Instant, Duration};
 use std::fmt::{Display, Formatter, Result as FmtResult};
+use std::time::{Duration, Instant};
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -57,13 +57,23 @@ struct RunResult {
 
 impl Display for RunResult {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        let RunResult { day, answer_one, answer_two } = self;
-        writeln!(f, "************************************************************")?;
+        let RunResult {
+            day,
+            answer_one,
+            answer_two,
+        } = self;
+        writeln!(
+            f,
+            "************************************************************"
+        )?;
         writeln!(f, "* Advent of Code: 2022, Day {day}")?;
         writeln!(f, "*   Solution for...")?;
         writeln!(f, "*     Part One: {answer_one}")?;
         writeln!(f, "*     Part Two: {answer_two}")?;
-        writeln!(f, "************************************************************")?;
+        writeln!(
+            f,
+            "************************************************************"
+        )?;
         write!(f, "")
     }
 }
@@ -100,7 +110,11 @@ fn run_day(day: u8) -> RunResult {
 
     let answer_one = run(Part::One);
     let answer_two = run(Part::Two);
-    RunResult { day, answer_one, answer_two }
+    RunResult {
+        day,
+        answer_one,
+        answer_two,
+    }
 }
 
 struct TimedResult {
@@ -112,29 +126,40 @@ struct TimedResult {
 
 impl Display for TimedResult {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        let TimedResult { day, answer_one, answer_two, duration } = self;
-        writeln!(f, "************************************************************")?;
+        let TimedResult {
+            day,
+            answer_one,
+            answer_two,
+            duration,
+        } = self;
+        writeln!(
+            f,
+            "************************************************************"
+        )?;
         writeln!(f, "* Advent of Code: 2022, Day {day}")?;
         writeln!(f, "*   Solution for...")?;
         writeln!(f, "*     Part One: {answer_one}")?;
         writeln!(f, "*     Part Two: {answer_two}")?;
         writeln!(f, "* Run Time: {duration:?}")?;
-        writeln!(f, "************************************************************")?;
+        writeln!(
+            f,
+            "************************************************************"
+        )?;
         write!(f, "")
     }
 }
 
 fn run_timed(day: u8, timer: &Instant) -> TimedResult {
     let run = match day {
-        1  => day01::run_both,
-        2  => day02::run_both,
-        3  => day03::run_both,
-        4  => day04::run_both,
-        5  => day05::run_both,
-        6  => day06::run_both,
-        7  => day07::run_both,
-        8  => day08::run_both,
-        9  => day09::run_both,
+        1 => day01::run_both,
+        2 => day02::run_both,
+        3 => day03::run_both,
+        4 => day04::run_both,
+        5 => day05::run_both,
+        6 => day06::run_both,
+        7 => day07::run_both,
+        8 => day08::run_both,
+        9 => day09::run_both,
         10 => day10::run_both,
         11 => day11::run_both,
         12 => day12::run_both,
@@ -157,5 +182,10 @@ fn run_timed(day: u8, timer: &Instant) -> TimedResult {
     let start = timer.elapsed();
     let (answer_one, answer_two) = run();
     let duration = timer.elapsed() - start;
-    TimedResult { day, answer_one, answer_two, duration }
+    TimedResult {
+        day,
+        answer_one,
+        answer_two,
+        duration,
+    }
 }

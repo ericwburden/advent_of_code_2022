@@ -4,11 +4,81 @@ use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Shl};
 use std::str::FromStr;
 
-// These are handy to have named, especially the high bit.
-const U64_LOW_BIT: u64 = 1;
-const U64_HIGH_BIT: u64 = 9223372036854775808;
+pub trait Chunk:
+    Copy
+    + Default
+    + PartialEq
+    + Eq
+    + BitOr<Output = Self>
+    + BitOrAssign<Self>
+    + BitAnd<Output = Self>
+    + BitAndAssign<Self>
+    + BitXor<Output = Self>
+    + BitXorAssign<Self>
+    + Shl<usize, Output = Self>
+    + Not<Output = Self>
+{
+    fn width() -> usize;
+    fn zero() -> Self;
+    fn low_bit() -> Self;
+    fn high_bit() -> Self;
+    fn rotate_right(self, n: u32) -> Self;
+    fn rotate_left(self, n: u32) -> Self;
+}
 
-/// Represents one row in the Grid. Each row is composed of a number 
+impl Chunk for u64 {
+    fn width() -> usize {
+        Self::BITS as usize
+    }
+
+    fn zero() -> Self {
+        0
+    }
+
+    fn low_bit() -> Self {
+        1
+    }
+
+    fn high_bit() -> Self {
+        9223372036854775808
+    }
+
+    fn rotate_right(self, n: u32) -> Self {
+        self.rotate_right(n)
+    }
+
+    fn rotate_left(self, n: u32) -> Self {
+        self.rotate_left(n)
+    }
+}
+
+impl Chunk for u128 {
+    fn width() -> usize {
+        Self::BITS as usize
+    }
+
+    fn zero() -> Self {
+        0
+    }
+
+    fn low_bit() -> Self {
+        1
+    }
+
+    fn high_bit() -> Self {
+        170141183460469231731687303715884105728
+    }
+
+    fn rotate_right(self, n: u32) -> Self {
+        self.rotate_right(n)
+    }
+
+    fn rotate_left(self, n: u32) -> Self {
+        self.rotate_left(n)
+    }
+}
+
+/// Represents one row in the Grid. Each row is composed of a number
 /// of unsigned integers. Each bit in the integers represents one column
 /// in the overall grid. For the rest of this implementation, it's
 /// important to note that the 'indices' of the bits in an integer are
@@ -16,12 +86,12 @@ const U64_HIGH_BIT: u64 = 9223372036854775808;
 /// left to right. This means that the rightmost bit in each integer
 /// represents the leftmost column in that "chunk" of bits in the row.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct GridRow<const CHUNKS: usize>([u64; CHUNKS]);
+struct GridRow<T: Chunk, const CHUNKS: usize>([T; CHUNKS]);
 
 /// Default a row where each chunk is 0
-impl<const CHUNKS: usize> Default for GridRow<CHUNKS> {
+impl<T: Chunk, const CHUNKS: usize> Default for GridRow<T, CHUNKS> {
     fn default() -> Self {
-        let inner = [<u64>::default(); CHUNKS];
+        let inner = [T::default(); CHUNKS];
         Self(inner)
     }
 }
@@ -31,48 +101,48 @@ impl<const CHUNKS: usize> Default for GridRow<CHUNKS> {
 /// and getting information out of a GridRow. Other operations work on the
 /// bits directly.
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
-struct GridRowIdx {
+struct GridRowIdx<T: Chunk> {
     chunk: usize,
-    set_bit: u64,
+    set_bit: T,
 }
 
 /// Convert a column index (usize) into a GridRowIdx, allowing you to access
 /// the `usize` column more easily.
-impl From<usize> for GridRowIdx {
+impl<T: Chunk> From<usize> for GridRowIdx<T> {
     fn from(index: usize) -> Self {
-        let chunk = index / <u64>::BITS as usize;
-        let offset = index % <u64>::BITS as usize;
-        let set_bit = 1 << offset;
+        let chunk = index / T::width();
+        let offset = index % T::width();
+        let set_bit = T::low_bit() << offset;
         GridRowIdx { chunk, set_bit }
     }
 }
 
-impl<const CHUNKS: usize> GridRow<CHUNKS> {
+impl<T: Chunk, const CHUNKS: usize> GridRow<T, CHUNKS> {
     /// Set a particular bit in the GridRow
-    fn set(&mut self, GridRowIdx { chunk, set_bit }: GridRowIdx) {
+    fn set(&mut self, GridRowIdx { chunk, set_bit }: GridRowIdx<T>) {
         self.0[chunk] |= set_bit;
     }
 
     /// Check if a particular bit in the GridRow is set
-    fn is_set(&self, GridRowIdx { chunk, set_bit }: GridRowIdx) -> bool {
-        self.0[chunk] & set_bit != 0
+    fn is_set(&self, GridRowIdx { chunk, set_bit }: GridRowIdx<T>) -> bool {
+        self.0[chunk] & set_bit != T::zero()
     }
 
     /// Produce all the GridRowIdx indices present in this GridRow, from
     /// left to right. These indices can be used to iterate through the
     /// bits in this GridRow.
-    fn indices(&self) -> impl Iterator<Item = GridRowIdx> {
+    fn indices(&self) -> impl Iterator<Item = GridRowIdx<T>> {
         (0..CHUNKS)
             .cartesian_product(0..(<u64>::BITS as usize))
             .map(|(c, b)| c + b)
             .map(GridRowIdx::from)
     }
 
-    /// Shift the bits in this row one space to the right. Accounts for the 
+    /// Shift the bits in this row one space to the right. Accounts for the
     /// fact that the rows aren't really contiguous but may be separated into
     /// multiple "chunks" of bits (integers).
     fn offset_right(&mut self) {
-        let mut carry = 0; // Carry overflowing bits from one chunk to the next
+        let mut carry = T::zero(); // Carry overflowing bits from one chunk to the next
 
         // For each chunk of bits...
         for chunk in self.0.iter_mut() {
@@ -81,7 +151,7 @@ impl<const CHUNKS: usize> GridRow<CHUNKS> {
             *chunk = chunk.rotate_left(1);
 
             // Get just the bit that was wrapped around the end of the "chunk"
-            let wrapped_bit = *chunk & U64_LOW_BIT;
+            let wrapped_bit = *chunk & T::low_bit();
 
             // Unset that wrapped bit if it was set.
             *chunk ^= wrapped_bit;
@@ -95,11 +165,11 @@ impl<const CHUNKS: usize> GridRow<CHUNKS> {
         }
     }
 
-    /// Shift the bits in this row one space to the left. Accounts for the 
+    /// Shift the bits in this row one space to the left. Accounts for the
     /// fact that the rows aren't really contiguous but may be separated into
     /// multiple "chunks" of bits (integers).
     fn offset_left(&mut self) {
-        let mut carry = 0; // Carry overflowing bits from one chunk to the next
+        let mut carry = T::zero(); // Carry overflowing bits from one chunk to the next
 
         // For each chunk of bits, in reverse order...
         for chunk in self.0.iter_mut().rev() {
@@ -109,7 +179,7 @@ impl<const CHUNKS: usize> GridRow<CHUNKS> {
 
             // Get just the bit that was wrapped around the end of the "chunk". Since
             // we're rotating right, this is the highest bit.
-            let wrapped_bit = *chunk & U64_HIGH_BIT;
+            let wrapped_bit = *chunk & T::high_bit();
 
             // Unset that wrapped bit if it was set.
             *chunk ^= wrapped_bit;
@@ -130,10 +200,10 @@ impl<const CHUNKS: usize> GridRow<CHUNKS> {
 * const generic CHUNKS, so Rust won't let you perform GridRow<1> & GridRow<2>.
 **************************************************************************************/
 
-impl<const CHUNKS: usize> BitAnd<GridRow<CHUNKS>> for GridRow<CHUNKS> {
-    type Output = GridRow<CHUNKS>;
+impl<T: Chunk, const CHUNKS: usize> BitAnd<GridRow<T, CHUNKS>> for GridRow<T, CHUNKS> {
+    type Output = GridRow<T, CHUNKS>;
 
-    fn bitand(self, other: GridRow<CHUNKS>) -> Self::Output {
+    fn bitand(self, other: GridRow<T, CHUNKS>) -> Self::Output {
         let GridRow(mut lhs) = self;
         let GridRow(rhs) = other;
         lhs.iter_mut()
@@ -143,16 +213,16 @@ impl<const CHUNKS: usize> BitAnd<GridRow<CHUNKS>> for GridRow<CHUNKS> {
     }
 }
 
-impl<const CHUNKS: usize> BitAndAssign for GridRow<CHUNKS> {
+impl<T: Chunk, const CHUNKS: usize> BitAndAssign for GridRow<T, CHUNKS> {
     fn bitand_assign(&mut self, other: Self) {
         *self = *self & other;
     }
 }
 
-impl<const CHUNKS: usize> BitOr<GridRow<CHUNKS>> for GridRow<CHUNKS> {
-    type Output = GridRow<CHUNKS>;
+impl<T: Chunk, const CHUNKS: usize> BitOr<GridRow<T, CHUNKS>> for GridRow<T, CHUNKS> {
+    type Output = GridRow<T, CHUNKS>;
 
-    fn bitor(self, other: GridRow<CHUNKS>) -> Self::Output {
+    fn bitor(self, other: GridRow<T, CHUNKS>) -> Self::Output {
         let GridRow(mut lhs) = self;
         let GridRow(rhs) = other;
         lhs.iter_mut()
@@ -162,16 +232,16 @@ impl<const CHUNKS: usize> BitOr<GridRow<CHUNKS>> for GridRow<CHUNKS> {
     }
 }
 
-impl<const CHUNKS: usize> BitOrAssign for GridRow<CHUNKS> {
+impl<T: Chunk, const CHUNKS: usize> BitOrAssign for GridRow<T, CHUNKS> {
     fn bitor_assign(&mut self, other: Self) {
         *self = *self | other;
     }
 }
 
-impl<const CHUNKS: usize> BitXor<GridRow<CHUNKS>> for GridRow<CHUNKS> {
-    type Output = GridRow<CHUNKS>;
+impl<T: Chunk, const CHUNKS: usize> BitXor<GridRow<T, CHUNKS>> for GridRow<T, CHUNKS> {
+    type Output = GridRow<T, CHUNKS>;
 
-    fn bitxor(self, other: GridRow<CHUNKS>) -> Self::Output {
+    fn bitxor(self, other: GridRow<T, CHUNKS>) -> Self::Output {
         let GridRow(mut lhs) = self;
         let GridRow(rhs) = other;
         lhs.iter_mut()
@@ -181,14 +251,14 @@ impl<const CHUNKS: usize> BitXor<GridRow<CHUNKS>> for GridRow<CHUNKS> {
     }
 }
 
-impl<const CHUNKS: usize> BitXorAssign<GridRow<CHUNKS>> for GridRow<CHUNKS> {
-    fn bitxor_assign(&mut self, other: GridRow<CHUNKS>) {
+impl<T: Chunk, const CHUNKS: usize> BitXorAssign<GridRow<T, CHUNKS>> for GridRow<T, CHUNKS> {
+    fn bitxor_assign(&mut self, other: GridRow<T, CHUNKS>) {
         *self = *self ^ other;
     }
 }
 
-impl<const CHUNKS: usize> Not for GridRow<CHUNKS> {
-    type Output = GridRow<CHUNKS>;
+impl<T: Chunk, const CHUNKS: usize> Not for GridRow<T, CHUNKS> {
+    type Output = GridRow<T, CHUNKS>;
 
     fn not(self) -> Self::Output {
         let GridRow(mut chunks) = self;
@@ -202,16 +272,15 @@ impl<const CHUNKS: usize> Not for GridRow<CHUNKS> {
 * This wraps up the GridRow and GridRowIdx definitions. Now, on to the Grid itself!
 **************************************************************************************/
 
-
 /// Represents a Grid of bits, where set bits indicate an elf is present in that
-/// space. A collection of GridRows. 
+/// space. A collection of GridRows.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Grid<const CHUNKS: usize, const ROWS: usize> {
-    rows: [GridRow<CHUNKS>; ROWS],
+pub struct Grid<T: Chunk, const CHUNKS: usize, const ROWS: usize> {
+    rows: [GridRow<T, CHUNKS>; ROWS],
 }
 
 /// The default Grid of the appropriate size with all spaces empty.
-impl<const CHUNKS: usize, const ROWS: usize> Default for Grid<CHUNKS, ROWS> {
+impl<T: Chunk, const CHUNKS: usize, const ROWS: usize> Default for Grid<T, CHUNKS, ROWS> {
     fn default() -> Self {
         let rows = [GridRow::default(); ROWS];
         Self { rows }
@@ -223,14 +292,14 @@ impl<const CHUNKS: usize, const ROWS: usize> Default for Grid<CHUNKS, ROWS> {
 /// and getting information out of a Grid. Other operations work on the
 /// bits directly.
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
-struct GridIdx {
+struct GridIdx<T: Chunk> {
     row: usize,
-    bit: GridRowIdx,
+    bit: GridRowIdx<T>,
 }
 
 /// Convert a (<row>, <col>) index into a GridIdx that serves the purpose
 /// of a (<row>, <col>) index into your Grid.
-impl From<(usize, usize)> for GridIdx {
+impl<T: Chunk> From<(usize, usize)> for GridIdx<T> {
     fn from(value: (usize, usize)) -> Self {
         let row = value.0;
         let bit = GridRowIdx::from(value.1);
@@ -238,21 +307,23 @@ impl From<(usize, usize)> for GridIdx {
     }
 }
 
-impl<const CHUNKS: usize, const ROWS: usize> Grid<CHUNKS, ROWS> {
+impl<T: Chunk, const CHUNKS: usize, const ROWS: usize> Grid<T, CHUNKS, ROWS> {
     /// Set a bit in the Grid
-    fn set(&mut self, GridIdx { row, bit }: GridIdx) {
+    fn set(&mut self, GridIdx { row, bit }: GridIdx<T>) {
         self.rows[row].set(bit);
     }
 
     /// Check to see if a bit in the Grid is set
-    fn is_set(&self, GridIdx { row, bit }: GridIdx) -> bool {
+    fn is_set(&self, GridIdx { row, bit }: GridIdx<T>) -> bool {
         self.rows[row].is_set(bit)
     }
 
     /// Iterate through the indices in this Grid. Allows for iterating over
     /// the spaces in the Grid indirectly.
-    fn indices(&self) -> impl Iterator<Item = GridIdx> {
-        (0..ROWS).cartesian_product(0..(CHUNKS * 64)).map(GridIdx::from)
+    fn indices(&self) -> impl Iterator<Item = GridIdx<T>> {
+        (0..ROWS)
+            .cartesian_product(0..(CHUNKS * 64))
+            .map(GridIdx::from)
     }
 
     /// Shift all the bits in the Grid one space to the right.
@@ -330,7 +401,7 @@ impl<const CHUNKS: usize, const ROWS: usize> Grid<CHUNKS, ROWS> {
 /// This is the input parsing for today's puzzle. Iterates over the lines and
 /// characters of the input, setting bits in an empty Grid. Shifts the bits
 /// such that the set bits are centered around the center of the Grid.
-impl<const CHUNKS: usize, const ROWS: usize> FromStr for Grid<CHUNKS, ROWS> {
+impl<T: Chunk, const CHUNKS: usize, const ROWS: usize> FromStr for Grid<T, CHUNKS, ROWS> {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -355,7 +426,6 @@ impl<const CHUNKS: usize, const ROWS: usize> FromStr for Grid<CHUNKS, ROWS> {
     }
 }
 
-
 /**************************************************************************************
 * Bitwise operations for Grid! Grid bitwise operations are performed row
 * by row, which means they need to be the same length. This is handled by the
@@ -363,10 +433,12 @@ impl<const CHUNKS: usize, const ROWS: usize> FromStr for Grid<CHUNKS, ROWS> {
 * Grid<1, 1> & GridRow<1, 2> or Grid<1, 1> & Grid<2, 1>.
 **************************************************************************************/
 
-impl<const CHUNKS: usize, const ROWS: usize> BitAnd<Grid<CHUNKS, ROWS>> for Grid<CHUNKS, ROWS> {
-    type Output = Grid<CHUNKS, ROWS>;
+impl<T: Chunk, const CHUNKS: usize, const ROWS: usize> BitAnd<Grid<T, CHUNKS, ROWS>>
+    for Grid<T, CHUNKS, ROWS>
+{
+    type Output = Grid<T, CHUNKS, ROWS>;
 
-    fn bitand(self, other: Grid<CHUNKS, ROWS>) -> Self::Output {
+    fn bitand(self, other: Grid<T, CHUNKS, ROWS>) -> Self::Output {
         let Grid { rows: mut lhs_rows } = self;
         let Grid { rows: rhs_rows } = other;
         lhs_rows
@@ -377,10 +449,12 @@ impl<const CHUNKS: usize, const ROWS: usize> BitAnd<Grid<CHUNKS, ROWS>> for Grid
     }
 }
 
-impl<const CHUNKS: usize, const ROWS: usize> BitOr<Grid<CHUNKS, ROWS>> for Grid<CHUNKS, ROWS> {
-    type Output = Grid<CHUNKS, ROWS>;
+impl<T: Chunk, const CHUNKS: usize, const ROWS: usize> BitOr<Grid<T, CHUNKS, ROWS>>
+    for Grid<T, CHUNKS, ROWS>
+{
+    type Output = Grid<T, CHUNKS, ROWS>;
 
-    fn bitor(self, other: Grid<CHUNKS, ROWS>) -> Self::Output {
+    fn bitor(self, other: Grid<T, CHUNKS, ROWS>) -> Self::Output {
         let Grid { rows: mut lhs_rows } = self;
         let Grid { rows: rhs_rows } = other;
         lhs_rows
@@ -391,10 +465,12 @@ impl<const CHUNKS: usize, const ROWS: usize> BitOr<Grid<CHUNKS, ROWS>> for Grid<
     }
 }
 
-impl<const CHUNKS: usize, const ROWS: usize> BitXor<Grid<CHUNKS, ROWS>> for Grid<CHUNKS, ROWS> {
-    type Output = Grid<CHUNKS, ROWS>;
+impl<T: Chunk, const CHUNKS: usize, const ROWS: usize> BitXor<Grid<T, CHUNKS, ROWS>>
+    for Grid<T, CHUNKS, ROWS>
+{
+    type Output = Grid<T, CHUNKS, ROWS>;
 
-    fn bitxor(self, other: Grid<CHUNKS, ROWS>) -> Self::Output {
+    fn bitxor(self, other: Grid<T, CHUNKS, ROWS>) -> Self::Output {
         let Grid { rows: mut lhs_rows } = self;
         let Grid { rows: rhs_rows } = other;
         lhs_rows
@@ -405,8 +481,8 @@ impl<const CHUNKS: usize, const ROWS: usize> BitXor<Grid<CHUNKS, ROWS>> for Grid
     }
 }
 
-impl<const CHUNKS: usize, const ROWS: usize> Not for Grid<CHUNKS, ROWS> {
-    type Output = Grid<CHUNKS, ROWS>;
+impl<T: Chunk, const CHUNKS: usize, const ROWS: usize> Not for Grid<T, CHUNKS, ROWS> {
+    type Output = Grid<T, CHUNKS, ROWS>;
 
     fn not(self) -> Self::Output {
         let Grid { mut rows } = self;
@@ -418,8 +494,6 @@ impl<const CHUNKS: usize, const ROWS: usize> Not for Grid<CHUNKS, ROWS> {
 /**************************************************************************************
 * And that's it for bitwise operations on Grid.
 **************************************************************************************/
-
-
 
 /// Represents one of the four cardinal directions.
 #[derive(Debug, Clone, Copy)]
@@ -460,27 +534,26 @@ impl IntoIterator for Rules {
     }
 }
 
-
-/// Represents an interim struct used to construct a new Grid state out of an 
+/// Represents an interim struct used to construct a new Grid state out of an
 /// existing Grid. I'm not convinced this is 100% a great use of the builder
 /// pattern, but it's good practice.
 #[derive(Debug, Default)]
-pub struct GridBuilder<const CHUNKS: usize, const ROWS: usize> {
-    base: Grid<CHUNKS, ROWS>,
+pub struct GridBuilder<T: Chunk, const CHUNKS: usize, const ROWS: usize> {
+    base: Grid<T, CHUNKS, ROWS>,
     propose_order: Rules,
-    north_south_blocked: Option<Grid<CHUNKS, ROWS>>,
-    east_west_blocked: Option<Grid<CHUNKS, ROWS>>,
-    stationary: Option<Grid<CHUNKS, ROWS>>,
-    willing_to_move: Option<Grid<CHUNKS, ROWS>>,
-    proposed_north: Option<Grid<CHUNKS, ROWS>>,
-    proposed_south: Option<Grid<CHUNKS, ROWS>>,
-    proposed_east: Option<Grid<CHUNKS, ROWS>>,
-    proposed_west: Option<Grid<CHUNKS, ROWS>>,
+    north_south_blocked: Option<Grid<T, CHUNKS, ROWS>>,
+    east_west_blocked: Option<Grid<T, CHUNKS, ROWS>>,
+    stationary: Option<Grid<T, CHUNKS, ROWS>>,
+    willing_to_move: Option<Grid<T, CHUNKS, ROWS>>,
+    proposed_north: Option<Grid<T, CHUNKS, ROWS>>,
+    proposed_south: Option<Grid<T, CHUNKS, ROWS>>,
+    proposed_east: Option<Grid<T, CHUNKS, ROWS>>,
+    proposed_west: Option<Grid<T, CHUNKS, ROWS>>,
 }
 
-impl<const CHUNKS: usize, const ROWS: usize> GridBuilder<CHUNKS, ROWS> {
+impl<T: Chunk, const CHUNKS: usize, const ROWS: usize> GridBuilder<T, CHUNKS, ROWS> {
     /// Start up a new GridBuilder based on an existing Grid and set of proposal rules.
-    pub fn init(base: Grid<CHUNKS, ROWS>, propose_order: Rules) -> Self {
+    pub fn init(base: Grid<T, CHUNKS, ROWS>, propose_order: Rules) -> Self {
         GridBuilder {
             base,
             propose_order,
@@ -708,7 +781,7 @@ impl<const CHUNKS: usize, const ROWS: usize> GridBuilder<CHUNKS, ROWS> {
     }
 
     /// Produce a Grid from the GridBuilder by combining all the different elf states.
-    pub fn finalize(mut self) -> Grid<CHUNKS, ROWS> {
+    pub fn finalize(mut self) -> Grid<T, CHUNKS, ROWS> {
         // Check the current builder state to move forward.
         let Some(stationary) = self.stationary else {
             panic!("The elves who will not try to move have not been identified!");
@@ -747,7 +820,7 @@ mod test {
     use super::*;
 
     /// Pretty printing is really helpful for debugging!
-    impl<const CHUNKS: usize> Display for GridRow<CHUNKS> {
+    impl<T: Chunk, const CHUNKS: usize> Display for GridRow<T, CHUNKS> {
         fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
             for idx in self.indices() {
                 let glyph = if self.is_set(idx) { '#' } else { '.' };
@@ -758,7 +831,7 @@ mod test {
     }
 
     /// Pretty printing is really helpful for debugging!
-    impl<const CHUNKS: usize, const ROWS: usize> Display for Grid<CHUNKS, ROWS> {
+    impl<T: Chunk, const CHUNKS: usize, const ROWS: usize> Display for Grid<T, CHUNKS, ROWS> {
         fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
             let mut current_row = 0;
             for idx in self.indices() {
@@ -766,7 +839,7 @@ mod test {
                     writeln!(f)?;
                     current_row = idx.row;
                 }
-    
+
                 let glyph = if self.is_set(idx) { '#' } else { '.' };
                 write!(f, "{glyph}")?;
             }
@@ -777,13 +850,8 @@ mod test {
     const INPUT: &str = include_str!("../../input/23/input.txt");
 
     #[test]
-    fn playground() {
-        println!("{}", 1u32.rotate_right(1));
-    }
-
-    #[test]
     fn part_one() {
-        let mut state: Grid<3, 192> = Grid::from_str(INPUT).unwrap();
+        let mut state: Grid<u64, 3, 192> = Grid::from_str(INPUT).unwrap();
         let start = std::time::Instant::now();
         let mut propose_order = Rules::default();
         for _ in 0..10 {
@@ -800,7 +868,7 @@ mod test {
 
     #[test]
     fn part_two() {
-        let mut state: Grid<3, 192> = Grid::from_str(INPUT).unwrap();
+        let mut state: Grid<u64, 3, 192> = Grid::from_str(INPUT).unwrap();
         let start = std::time::Instant::now();
         let mut last_state = Grid::default();
         let mut propose_order = Rules::default();
@@ -818,5 +886,4 @@ mod test {
         println!("Rounds Taken: {}", rounds);
         println!("Calculated in: {:?}", start.elapsed());
     }
-
 }

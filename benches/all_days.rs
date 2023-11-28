@@ -136,13 +136,11 @@ pub fn benchmark_day06_input(c: &mut Criterion) {
 }
 
 pub fn benchmark_day06_part01(c: &mut Criterion) {
-    let input = black_box(day06::input::read());
-    c.bench_function("Day 06, Part 1", |b| b.iter(|| day06::part1::solve(&input)));
+    c.bench_function("Day 06, Part 1", |b| b.iter(|| day06::part1::solve(day06::input::read())));
 }
 
 pub fn benchmark_day06_part02(c: &mut Criterion) {
-    let input = black_box(day06::input::read());
-    c.bench_function("Day 06, Part 2", |b| b.iter(|| day06::part2::solve(&input)));
+    c.bench_function("Day 06, Part 2", |b| b.iter(|| day06::part2::solve(day06::input::read())));
 }
 
 criterion_group!(
