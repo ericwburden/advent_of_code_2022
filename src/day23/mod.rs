@@ -1,11 +1,14 @@
+pub mod grid;
 pub mod input;
 pub mod part1;
 pub mod part2;
 
 use crate::{Output, Part};
-use input::Grove;
+use grid::Grid;
 
-pub type Input = Grove;
+// These values are tuned to produce the right answer in the least
+// time. It's a bit of a hack, to be honest, but it works!
+pub type Input = Grid<u128, 2, 176>;
 
 pub fn run(part: Part) -> Output {
     let input = input::read();

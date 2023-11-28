@@ -29,9 +29,9 @@ impl From<Snafu> for i128 {
 }
 
 /// Unit conversion from a decimal integer into a SNAFU number. This is a much
-/// less common (to me) operation. The tricky bit is handling the fact that we have 
+/// less common (to me) operation. The tricky bit is handling the fact that we have
 /// digits whose value is centered around zero instead of anchored at zero on the
-/// least significant place. For a normal base-5 conversion, I'd take the result 
+/// least significant place. For a normal base-5 conversion, I'd take the result
 /// of the remainder % 5, then divide by 5 for each digit until no remainder was
 /// left. Apparently, adding two each round lets us shift the digits. I'm not
 /// 100% sure why this works, but it works. Math, amirite? This solution was inspired
@@ -50,7 +50,7 @@ impl From<i128> for Snafu {
                 _ => unreachable!(),
             };
             out.push(glyph);
-            remainder += 2;  // This works for some reason.
+            remainder += 2; // This works for some reason.
             remainder /= 5;
         }
         Snafu(out.chars().rev().collect::<String>())

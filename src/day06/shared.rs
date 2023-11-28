@@ -1,5 +1,5 @@
 use super::input::Signal;
-use std::ops::{BitAnd, BitOrAssign};
+use std::ops::{BitAnd, BitOrAssign, BitXorAssign};
 
 /// Implement bitwise _and_ for `Signal`s
 impl BitAnd for Signal {
@@ -17,6 +17,18 @@ impl BitOrAssign for Signal {
     }
 }
 
+impl BitXorAssign for Signal {
+    fn bitxor_assign(&mut self, rhs: Self) {
+        self.0 ^= rhs.0
+    }
+}
+
+impl Signal {
+    fn count_components(&self) -> u32 {
+        self.0.count_ones()
+    }
+}
+
 /// Represents a 'detector' for unique sequences of `Signal`s of a constant length.
 /// Holds a buffer of the signals encountered so far and inserts new signals into
 /// that buffer by wrapping around the length of the buffer.
@@ -24,6 +36,7 @@ impl BitOrAssign for Signal {
 pub struct SequenceDetector<const N: usize> {
     buffer: [Signal; N],
     mark: usize,
+    composite_signal: Signal,
 }
 
 impl<const N: usize> SequenceDetector<N> {
@@ -32,34 +45,29 @@ impl<const N: usize> SequenceDetector<N> {
     pub fn new() -> Self {
         let buffer = [Signal::default(); N];
         let mark = 0;
-        Self { buffer, mark }
+        let composite_signal = Signal::default();
+        Self { buffer, mark, composite_signal }
     }
 
     /// Given a `Signal`, indicates whether the most recent `N` signals detected
     /// comprises a unique sequence.
     pub fn detect(&mut self, signal: Signal) -> bool {
-        // Add the signal to the buffer and bump the marker over by one to
-        // receive the next signal.
+        // Remove the oldest signal from the composite signal, add the current
+        // signal to the buffer and the composite signal, and bump the marker over
+        // by one to receive the next signal.
+        self.composite_signal ^= self.buffer[self.mark];
+
+        if self.composite_signal.count_components() < 3 {
+            self.composite_signal |= self.buffer[self.mark];
+        }
+        
+        self.composite_signal |= signal;
         self.buffer[self.mark] = signal;
         self.mark = (self.mark + 1) % N;
 
-        // If the marker points to an empty signal in the buffer, this means
-        // the buffer isn't full yet and we definitely haven't found `N` unique
-        // signal inputs.
-        if self.buffer[self.mark] == Signal(0) {
-            return false;
-        }
-
-        // Check the buffer for unique signals. If any duplicate `Signal`s are
-        // detected, return false early. If all `Signal`s _are_ unique, return true.
-        let mut bits = Signal(0);
-        for bit in self.buffer.iter() {
-            if *bit & bits > Signal(0) {
-                return false;
-            }
-            bits |= *bit;
-        }
-        true
+        // Return an indicator as to whether or not the buffer contains N unique
+        // signals, indicated by the number of signals in the composite signal
+        self.composite_signal.count_components() == N as u32
     }
 }
 
